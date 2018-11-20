@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.flowable.ui.admin.domain.EndpointType;
 import org.flowable.ui.admin.domain.ServerConfig;
 import org.flowable.ui.admin.repository.ServerConfigRepository;
+import org.flowable.ui.common.security.SecurityUtils;
 import org.flowable.ui.common.service.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -50,6 +51,10 @@ public abstract class AbstractClientResource {
         Map<String, String[]> resultMap = new HashMap<>();
         resultMap.putAll(parameterMap);
         resultMap.remove(SERVER_ID);
+
+        if (SecurityUtils.getCurrentTenantId() != null) {
+            resultMap.put("tenantId", new String[] { SecurityUtils.getCurrentTenantId() });
+        }
         return resultMap;
     }
 

@@ -36,18 +36,7 @@ public class DefaultTenantProvider implements TenantProvider {
             return tenantId;
         }
         
-        FlowableAppUser appUser = SecurityUtils.getCurrentFlowableAppUser();
-        if(appUser != null) {
-            // quotes can help solve whitespace issues, trimming here would not 
-            // help solve the problem at source which is in user database
-            LOGGER.debug("Using user tenantId: '{}'", tenantId);
-            
-            return appUser.getUserObject().getTenantId();
-        }
-
-        LOGGER.debug("No tenantId");
-
-        return null;
+        return SecurityUtils.getCurrentTenantId();
     }
     
 }
