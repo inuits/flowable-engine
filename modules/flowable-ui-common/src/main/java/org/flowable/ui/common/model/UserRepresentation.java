@@ -87,9 +87,14 @@ public class UserRepresentation extends AbstractRepresentation {
     public String getTenantId() {
         return tenantId;
     }
+
     public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+        if (tenantId == null || tenantId.isEmpty())
+            this.tenantId = null;
+        else
+            this.tenantId = tenantId;
     }
+
     public List<GroupRepresentation> getGroups() {
         return groups;
     }
