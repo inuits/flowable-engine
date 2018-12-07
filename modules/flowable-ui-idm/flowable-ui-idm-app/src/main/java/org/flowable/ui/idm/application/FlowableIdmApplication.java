@@ -38,7 +38,7 @@ public class FlowableIdmApplication extends SpringBootServletInitializer {
 
         @Bean
         public SSOHandler ssoHandler() {
-            return new EmptySSOHandler();
+            return new DigipolisSSOHandler();
         }
 
 }
