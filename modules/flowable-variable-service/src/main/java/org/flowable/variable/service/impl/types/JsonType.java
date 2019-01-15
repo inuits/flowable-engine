@@ -60,7 +60,7 @@ public class JsonType implements VariableType {
 
     @Override
     public void setValue(Object value, ValueFields valueFields) {
-        valueFields.setTextValue(value != null ? value.toString() : null);
+        valueFields.setTextValue(value != null ? objectMapper.valueToTree(value).toString() : null);
     }
 
     @Override
@@ -68,10 +68,12 @@ public class JsonType implements VariableType {
         if (value == null) {
             return true;
         }
-        if (JsonNode.class.isAssignableFrom(value.getClass())) {
-            JsonNode jsonValue = (JsonNode) value;
-            return jsonValue.toString().length() <= maxLength;
+
+        JsonNode node = objectMapper.valueToTree(value);
+        if (node != null && !node.toString().isEmpty()) {
+            return true;
         }
+
         return false;
     }
 }
