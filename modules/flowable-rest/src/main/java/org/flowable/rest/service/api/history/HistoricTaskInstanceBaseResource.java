@@ -265,7 +265,16 @@ public class HistoricTaskInstanceBaseResource {
     }
     
     protected HistoricTaskInstance getHistoricTaskInstanceFromRequest(String taskId) {
-        HistoricTaskInstance taskInstance = historyService.createHistoricTaskInstanceQuery().taskId(taskId).singleResult();
+        return getHistoricTaskInstanceFromRequest(taskId, null);
+    }
+    
+    protected HistoricTaskInstance getHistoricTaskInstanceFromRequest(String taskId, String tenantId) {
+        final HistoricTaskInstanceQuery historicTaskInstanceQuery = historyService.createHistoricTaskInstanceQuery();
+        if (tenantId != null) {
+            historicTaskInstanceQuery.taskTenantId(tenantId);
+        }
+        
+        HistoricTaskInstance taskInstance = historicTaskInstanceQuery.taskId(taskId).singleResult();
         if (taskInstance == null) {
             throw new FlowableObjectNotFoundException("Could not find a task instance with id '" + taskId + "'.", HistoricTaskInstance.class);
         }
