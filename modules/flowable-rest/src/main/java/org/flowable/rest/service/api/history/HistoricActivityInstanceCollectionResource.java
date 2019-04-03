@@ -13,6 +13,14 @@
 
 package org.flowable.rest.service.api.history;
 
+import java.util.Map;
+
+import org.flowable.common.rest.api.DataResponse;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -21,14 +29,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Authorization;
-
-import org.flowable.common.rest.api.DataResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
 
 /**
  * @author Tijs Rademakers
@@ -56,7 +56,7 @@ public class HistoricActivityInstanceCollectionResource extends HistoricActivity
             @ApiImplicitParam(name = "withoutTenantId", dataType = "boolean", value = "If true, only returns instances without a tenantId set. If false, the withoutTenantId parameter is ignored.", paramType = "query")
     })
     @GetMapping(value = "/history/historic-activity-instances", produces = "application/json")
-    public DataResponse<HistoricActivityInstanceResponse> getHistoricActivityInstances(@ApiParam(hidden = true) @RequestParam Map<String, String> allRequestParams, HttpServletRequest request) {
+    public DataResponse<HistoricActivityInstanceResponse> getHistoricActivityInstances(@ApiParam(hidden = true) @RequestParam Map<String, String> allRequestParams, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
         HistoricActivityInstanceQueryRequest query = new HistoricActivityInstanceQueryRequest();
 
         // Populate query based on request
@@ -106,6 +106,10 @@ public class HistoricActivityInstanceCollectionResource extends HistoricActivity
 
         if (allRequestParams.get("withoutTenantId") != null) {
             query.setWithoutTenantId(Boolean.valueOf(allRequestParams.get("withoutTenantId")));
+        }
+        
+        if (tenantId != null) {
+            query.setTenantId(tenantId);
         }
 
         return getQueryResponse(query, allRequestParams);

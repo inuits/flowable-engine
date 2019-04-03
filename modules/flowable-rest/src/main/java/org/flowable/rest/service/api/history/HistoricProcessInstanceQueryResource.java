@@ -23,6 +23,7 @@ import io.swagger.annotations.Authorization;
 import org.flowable.common.rest.api.DataResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,8 +43,11 @@ public class HistoricProcessInstanceQueryResource extends HistoricProcessInstanc
             @ApiResponse(code = 200, message = "Indicates request was successful and the process instances are returned"),
             @ApiResponse(code = 400, message = "Indicates an parameter was passed in the wrong format. The status-message contains additional information.") })
     @PostMapping(value = "/query/historic-process-instances", produces = "application/json")
-    public DataResponse<HistoricProcessInstanceResponse> queryProcessInstances(@RequestBody HistoricProcessInstanceQueryRequest queryRequest, @ApiParam(hidden = true) @RequestParam Map<String, String> allRequestParams, HttpServletRequest request) {
-
+    public DataResponse<HistoricProcessInstanceResponse> queryProcessInstances(@RequestBody HistoricProcessInstanceQueryRequest queryRequest, @ApiParam(hidden = true) @RequestParam Map<String, String> allRequestParams, @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletRequest request) {
+        if (tenantId != null) {
+            queryRequest.setTenantId(tenantId);
+        }
+        
         return getQueryResponse(queryRequest, allRequestParams);
     }
 }

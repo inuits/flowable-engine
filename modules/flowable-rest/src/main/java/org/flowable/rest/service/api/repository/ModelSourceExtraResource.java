@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -51,8 +52,8 @@ public class ModelSourceExtraResource extends BaseModelSourceResource {
             @ApiResponse(code = 404, message = "Indicates the requested model was not found.")
     })
     @GetMapping("/repository/models/{modelId}/source-extra")
-    public byte[] getModelBytes(@ApiParam(name = "modelId") @PathVariable String modelId, HttpServletResponse response) {
-        Model model = getModelFromRequest(modelId);
+    public byte[] getModelBytes(@ApiParam(name = "modelId") @PathVariable String modelId, @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletResponse response) {
+        Model model = getModelFromRequest(modelId, tenantId);
         byte[] editorSource = repositoryService.getModelEditorSourceExtra(model.getId());
         if (editorSource == null) {
             throw new FlowableObjectNotFoundException("Model with id '" + modelId + "' does not have extra source available.", String.class);
@@ -71,8 +72,8 @@ public class ModelSourceExtraResource extends BaseModelSourceResource {
             @ApiResponse(code = 404, message = "Indicates the requested model was not found.")
     })
     @PutMapping(value = "/repository/models/{modelId}/source-extra", consumes = "multipart/form-data")
-    public void setModelSource(@ApiParam(name = "modelId") @PathVariable String modelId, HttpServletRequest request, HttpServletResponse response) {
-        Model model = getModelFromRequest(modelId);
+    public void setModelSource(@ApiParam(name = "modelId") @PathVariable String modelId, @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletRequest request, HttpServletResponse response) {
+        Model model = getModelFromRequest(modelId, tenantId);
         try {
 
             if (!(request instanceof MultipartHttpServletRequest)) {

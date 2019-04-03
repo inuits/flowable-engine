@@ -22,6 +22,7 @@ import io.swagger.annotations.Authorization;
 import org.flowable.common.rest.api.DataResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,9 +44,9 @@ public class FormInstanceQueryResource extends BaseFormInstanceResource {
             @ApiResponse(code = 400, message = "Indicates a parameter was passed in the wrong format . The status-message contains additional information.")
     })
     @PostMapping(value = "/query/form-instances", produces = "application/json")
-    public DataResponse<FormInstanceResponse> queryFormInstances(@RequestBody FormInstanceQueryRequest queryRequest, @ApiParam(hidden = true) @RequestParam Map<String, String> allRequestParams, HttpServletRequest request) {
+    public DataResponse<FormInstanceResponse> queryFormInstances(@RequestBody FormInstanceQueryRequest queryRequest, @ApiParam(hidden = true) @RequestParam Map<String, String> allRequestParams, @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletRequest request) {
 
-        return getQueryResponse(queryRequest, allRequestParams);
+        return getQueryResponse(queryRequest, allRequestParams, tenantId);
     }
 
 }

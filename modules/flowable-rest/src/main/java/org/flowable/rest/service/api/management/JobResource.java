@@ -13,7 +13,6 @@
 
 package org.flowable.rest.service.api.management;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.flowable.common.engine.api.FlowableIllegalArgumentException;
@@ -29,6 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
@@ -62,8 +62,8 @@ public class JobResource extends JobBaseResource {
             @ApiResponse(code = 404, message = "Indicates the requested job does not exist.")
     })
     @GetMapping(value = "/management/jobs/{jobId}", produces = "application/json")
-    public JobResponse getJob(@ApiParam(name = "jobId") @PathVariable String jobId, HttpServletRequest request) {
-        Job job = getJobById(jobId);
+    public JobResponse getJob(@ApiParam(name = "jobId") @PathVariable String jobId, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
+        Job job = getJobById(jobId, tenantId);
         return restResponseFactory.createJobResponse(job);
     }
 
@@ -73,8 +73,8 @@ public class JobResource extends JobBaseResource {
             @ApiResponse(code = 404, message = "Indicates the requested job does not exist.")
     })
     @GetMapping(value = "/management/timer-jobs/{jobId}", produces = "application/json")
-    public JobResponse getTimerJob(@ApiParam(name = "jobId") @PathVariable String jobId, HttpServletRequest request) {
-        Job job = getTimerJobById(jobId);
+    public JobResponse getTimerJob(@ApiParam(name = "jobId") @PathVariable String jobId, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
+        Job job = getTimerJobById(jobId, tenantId);
         return restResponseFactory.createJobResponse(job);
     }
 
@@ -84,8 +84,8 @@ public class JobResource extends JobBaseResource {
             @ApiResponse(code = 404, message = "Indicates the requested job does not exist.")
     })
     @GetMapping(value = "/management/suspended-jobs/{jobId}", produces = "application/json")
-    public JobResponse getSuspendedJob(@ApiParam(name = "jobId") @PathVariable String jobId, HttpServletRequest request) {
-        Job job = getSuspendedJobById(jobId);
+    public JobResponse getSuspendedJob(@ApiParam(name = "jobId") @PathVariable String jobId, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
+        Job job = getSuspendedJobById(jobId, tenantId);
         return restResponseFactory.createJobResponse(job);
     }
 
@@ -95,8 +95,8 @@ public class JobResource extends JobBaseResource {
             @ApiResponse(code = 404, message = "Indicates the requested job does not exist.")
     })
     @GetMapping(value = "/management/deadletter-jobs/{jobId}", produces = "application/json")
-    public JobResponse getDeadletterJob(@ApiParam(name = "jobId") @PathVariable String jobId, HttpServletRequest request) {
-        Job job = getDeadLetterJobById(jobId);
+    public JobResponse getDeadletterJob(@ApiParam(name = "jobId") @PathVariable String jobId, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
+        Job job = getDeadLetterJobById(jobId, tenantId);
         return restResponseFactory.createJobResponse(job);
     }
 
@@ -106,8 +106,8 @@ public class JobResource extends JobBaseResource {
             @ApiResponse(code = 404, message = "Indicates the requested job was not found..")
     })
     @DeleteMapping("/management/jobs/{jobId}")
-    public void deleteJob(@ApiParam(name = "jobId") @PathVariable String jobId, HttpServletResponse response) {
-        Job job = getJobById(jobId);
+    public void deleteJob(@ApiParam(name = "jobId") @PathVariable String jobId, @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletResponse response) {
+        Job job = getJobById(jobId, tenantId);
         if (restApiInterceptor != null) {
             restApiInterceptor.deleteJob(job);
         }
@@ -127,8 +127,8 @@ public class JobResource extends JobBaseResource {
             @ApiResponse(code = 404, message = "Indicates the requested job was not found.")
     })
     @DeleteMapping("/management/timer-jobs/{jobId}")
-    public void deleteTimerJob(@ApiParam(name = "jobId") @PathVariable String jobId, HttpServletResponse response) {
-        Job job = getTimerJobById(jobId);
+    public void deleteTimerJob(@ApiParam(name = "jobId") @PathVariable String jobId, @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletResponse response) {
+        Job job = getTimerJobById(jobId, tenantId);
         if (restApiInterceptor != null) {
             restApiInterceptor.deleteJob(job);
         }
@@ -148,8 +148,8 @@ public class JobResource extends JobBaseResource {
             @ApiResponse(code = 404, message = "Indicates the requested job was not found.")
     })
     @DeleteMapping("/management/suspended-jobs/{jobId}")
-    public void deleteSuspendedJob(@ApiParam(name = "jobId") @PathVariable String jobId, HttpServletResponse response) {
-        Job job = getSuspendedJobById(jobId);
+    public void deleteSuspendedJob(@ApiParam(name = "jobId") @PathVariable String jobId, @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletResponse response) {
+        Job job = getSuspendedJobById(jobId, tenantId);
         if (restApiInterceptor != null) {
             restApiInterceptor.deleteJob(job);
         }
@@ -169,8 +169,8 @@ public class JobResource extends JobBaseResource {
             @ApiResponse(code = 404, message = "Indicates the requested job was not found.")
     })
     @DeleteMapping("/management/deadletter-jobs/{jobId}")
-    public void deleteDeadLetterJob(@ApiParam(name = "jobId") @PathVariable String jobId, HttpServletResponse response) {
-        Job job = getDeadLetterJobById(jobId);
+    public void deleteDeadLetterJob(@ApiParam(name = "jobId") @PathVariable String jobId, @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletResponse response) {
+        Job job = getDeadLetterJobById(jobId, tenantId);
         if (restApiInterceptor != null) {
             restApiInterceptor.deleteJob(job);
         }
@@ -191,12 +191,12 @@ public class JobResource extends JobBaseResource {
             @ApiResponse(code = 500, message = "Indicates the an exception occurred while executing the job. The status-description contains additional detail about the error. The full error-stacktrace can be fetched later on if needed.")
     })
     @PostMapping("/management/jobs/{jobId}")
-    public void executeJobAction(@ApiParam(name = "jobId") @PathVariable String jobId, @RequestBody RestActionRequest actionRequest, HttpServletResponse response) {
+    public void executeJobAction(@ApiParam(name = "jobId") @PathVariable String jobId, @RequestBody RestActionRequest actionRequest, @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletResponse response) {
         if (actionRequest == null || !EXECUTE_ACTION.equals(actionRequest.getAction())) {
             throw new FlowableIllegalArgumentException("Invalid action, only 'execute' is supported.");
         }
         
-        Job job = getJobById(jobId);
+        Job job = getJobById(jobId, tenantId);
 
         try {
             managementService.executeJob(job.getId());
@@ -215,12 +215,12 @@ public class JobResource extends JobBaseResource {
             @ApiResponse(code = 500, message = "Indicates the an exception occurred while executing the job. The status-description contains additional detail about the error. The full error-stacktrace can be fetched later on if needed.")
     })
     @PostMapping("/management/timer-jobs/{jobId}")
-    public void executeTimerJobAction(@ApiParam(name = "jobId") @PathVariable String jobId, @RequestBody RestActionRequest actionRequest, HttpServletResponse response) {
+    public void executeTimerJobAction(@ApiParam(name = "jobId") @PathVariable String jobId, @RequestBody RestActionRequest actionRequest, @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletResponse response) {
         if (actionRequest == null || !MOVE_ACTION.equals(actionRequest.getAction())) {
             throw new FlowableIllegalArgumentException("Invalid action, only 'move' is supported.");
         }
         
-        Job job = getTimerJobById(jobId);
+        Job job = getTimerJobById(jobId, tenantId);
 
         try {
             managementService.moveTimerToExecutableJob(job.getId());
@@ -239,12 +239,12 @@ public class JobResource extends JobBaseResource {
             @ApiResponse(code = 500, message = "Indicates the an exception occurred while executing the job. The status-description contains additional detail about the error. The full error-stacktrace can be fetched later on if needed.")
     })
     @PostMapping("/management/deadletter-jobs/{jobId}")
-    public void executeDeadLetterJobAction(@ApiParam(name = "jobId") @PathVariable String jobId, @RequestBody RestActionRequest actionRequest, HttpServletResponse response) {
+    public void executeDeadLetterJobAction(@ApiParam(name = "jobId") @PathVariable String jobId, @RequestBody RestActionRequest actionRequest, @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletResponse response) {
         if (actionRequest == null || !MOVE_ACTION.equals(actionRequest.getAction())) {
             throw new FlowableIllegalArgumentException("Invalid action, only 'move' is supported.");
         }
         
-        Job deadLetterJob = getDeadLetterJobById(jobId);
+        Job deadLetterJob = getDeadLetterJobById(jobId, tenantId);
 
         try {
             managementService.moveDeadLetterJobToExecutableJob(deadLetterJob.getId(), processEngineConfiguration.getAsyncExecutorNumberOfRetries());
