@@ -48,6 +48,10 @@ public class BaseFormInstanceResource {
     protected FormRestApiInterceptor restApiInterceptor;
 
     protected DataResponse<FormInstanceResponse> getQueryResponse(FormInstanceQueryRequest queryRequest, Map<String, String> requestParams) {
+        return getQueryResponse(queryRequest, requestParams, null);
+    }
+    
+    protected DataResponse<FormInstanceResponse> getQueryResponse(FormInstanceQueryRequest queryRequest, Map<String, String> requestParams, String tenantId) {
 
         FormInstanceQuery query = formService.createFormInstanceQuery();
 
@@ -101,6 +105,9 @@ public class BaseFormInstanceResource {
         }
         if (Boolean.TRUE.equals(queryRequest.isWithoutTenantId())) {
             query.withoutTenantId();
+        }
+        if (tenantId != null) {
+            query.tenantId(tenantId);
         }
         
         if (restApiInterceptor != null) {

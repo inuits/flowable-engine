@@ -18,7 +18,6 @@ import static org.flowable.common.rest.api.PaginateListUtil.paginateList;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.flowable.common.engine.api.query.QueryProperty;
@@ -30,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -85,7 +85,7 @@ public class ModelCollectionResource extends BaseModelResource {
             @ApiResponse(code = 400, message = "Indicates a parameter was passed in the wrong format. The status-message contains additional information.")
     })
     @GetMapping(value = "/repository/models", produces = "application/json")
-    public DataResponse<ModelResponse> getModels(@ApiParam(hidden = true) @RequestParam Map<String, String> allRequestParams, HttpServletRequest request) {
+    public DataResponse<ModelResponse> getModels(@ApiParam(hidden = true) @RequestParam Map<String, String> allRequestParams, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
         ModelQuery modelQuery = repositoryService.createModelQuery();
 
         if (allRequestParams.containsKey("id")) {
@@ -146,6 +146,10 @@ public class ModelCollectionResource extends BaseModelResource {
             restApiInterceptor.accessModelInfoWithQuery(modelQuery);
         }
         
+        if (tenantId != null) {
+            modelQuery.modelTenantId(tenantId);
+        }
+        
         return paginateList(allRequestParams, modelQuery, "id", allowedSortProperties, restResponseFactory::createModelResponseList);
     }
 
@@ -155,7 +159,7 @@ public class ModelCollectionResource extends BaseModelResource {
             @ApiResponse(code = 201, message = "Indicates the model was created.")
     })
     @PostMapping(value = "/repository/models", produces = "application/json")
-    public ModelResponse createModel(@RequestBody ModelRequest modelRequest, HttpServletRequest request, HttpServletResponse response) {
+    public ModelResponse createModel(@RequestBody ModelRequest modelRequest, HttpServletResponse response) {
         Model model = repositoryService.newModel();
         model.setCategory(modelRequest.getCategory());
         model.setDeploymentId(modelRequest.getDeploymentId());
