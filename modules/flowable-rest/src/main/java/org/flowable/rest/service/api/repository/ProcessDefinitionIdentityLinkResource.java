@@ -15,7 +15,6 @@ package org.flowable.rest.service.api.repository;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.flowable.common.engine.api.FlowableIllegalArgumentException;
@@ -29,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
@@ -53,9 +53,9 @@ public class ProcessDefinitionIdentityLinkResource extends BaseProcessDefinition
     @GetMapping(value = "/repository/process-definitions/{processDefinitionId}/identitylinks/{family}/{identityId}", produces = "application/json")
     public RestIdentityLink getIdentityLink(@ApiParam(name = "processDefinitionId") @PathVariable("processDefinitionId") String processDefinitionId,
             @ApiParam(name = "family") @PathVariable("family") String family, @ApiParam(name = "identityId") @PathVariable("identityId") String identityId,
-            HttpServletRequest request) {
+            @RequestHeader(required = false, value = "x-tenant") String tenantId) {
 
-        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId);
+        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId, tenantId);
 
         validateIdentityLinkArguments(family, identityId);
 
@@ -73,9 +73,9 @@ public class ProcessDefinitionIdentityLinkResource extends BaseProcessDefinition
     @DeleteMapping(value = "/repository/process-definitions/{processDefinitionId}/identitylinks/{family}/{identityId}")
     public void deleteIdentityLink(@ApiParam(name = "processDefinitionId") @PathVariable("processDefinitionId") String processDefinitionId,
             @ApiParam(name = "family") @PathVariable("family") String family, @ApiParam(name = "identityId") @PathVariable("identityId") String identityId,
-            HttpServletResponse response) {
+            @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletResponse response) {
 
-        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId);
+        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId, tenantId);
 
         validateIdentityLinkArguments(family, identityId);
 

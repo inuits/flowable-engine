@@ -47,7 +47,19 @@ public class BaseHistoricDecisionExecutionResource {
      * Returns the {@link DmnHistoricDecisionExecution} that is requested. Throws the right exceptions when bad request was made or decision table was not found.
      */
     protected DmnHistoricDecisionExecution getHistoricDecisionExecutionFromRequest(String decisionExecutionId) {
+        return getHistoricDecisionExecutionFromRequest(decisionExecutionId, null);
+    }
+    
+    /**
+     * Returns the {@link DmnHistoricDecisionExecution} that is requested and has the given tenant ID.
+     * Throws the right exceptions when bad request was made or decision table was not found.
+     */
+    protected DmnHistoricDecisionExecution getHistoricDecisionExecutionFromRequest(String decisionExecutionId, String tenantId) {
         DmnHistoricDecisionExecutionQuery historicDecisionExecutionQuery = dmnHistoryService.createHistoricDecisionExecutionQuery().id(decisionExecutionId);
+        
+        if (tenantId != null) {
+            historicDecisionExecutionQuery.tenantId(tenantId);
+        }
 
         DmnHistoricDecisionExecution decisionExecution = historicDecisionExecutionQuery.singleResult();
 

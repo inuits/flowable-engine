@@ -22,6 +22,7 @@ import io.swagger.annotations.Authorization;
 import org.flowable.engine.runtime.Execution;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -41,8 +42,8 @@ public class ExecutionActiveActivitiesCollectionResource extends ExecutionBaseRe
             @ApiResponse(code = 404, message = "Indicates the execution was not found.")
     })
     @GetMapping(value = "/runtime/executions/{executionId}/activities", produces = "application/json")
-    public List<String> getActiveActivities(@ApiParam(name = "executionId") @PathVariable String executionId) {
-        Execution execution = getExecutionFromRequest(executionId);
+    public List<String> getActiveActivities(@ApiParam(name = "executionId") @PathVariable String executionId, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
+        Execution execution = getExecutionFromRequest(executionId, tenantId);
         return runtimeService.getActiveActivityIds(execution.getId());
     }
 }

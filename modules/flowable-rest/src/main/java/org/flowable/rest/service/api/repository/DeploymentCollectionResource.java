@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -100,7 +101,7 @@ public class DeploymentCollectionResource {
             @ApiResponse(code = 200, message = "Indicates the request was successful."),
     })
     @GetMapping(value = "/repository/deployments", produces = "application/json")
-    public DataResponse<DeploymentResponse> getDeployments(@ApiParam(hidden = true) @RequestParam Map<String, String> allRequestParams, HttpServletRequest request) {
+    public DataResponse<DeploymentResponse> getDeployments(@ApiParam(hidden = true) @RequestParam Map<String, String> allRequestParams, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
         DeploymentQuery deploymentQuery = repositoryService.createDeploymentQuery();
 
         // Apply filters
@@ -137,6 +138,10 @@ public class DeploymentCollectionResource {
         
         if (restApiInterceptor != null) {
             restApiInterceptor.accessDeploymentsWithQuery(deploymentQuery);
+        }
+        
+        if (tenantId != null) {
+            deploymentQuery.deploymentTenantId(tenantId);
         }
 
         return paginateList(allRequestParams, deploymentQuery, "id", allowedSortProperties, restResponseFactory::createDeploymentResponseList);
