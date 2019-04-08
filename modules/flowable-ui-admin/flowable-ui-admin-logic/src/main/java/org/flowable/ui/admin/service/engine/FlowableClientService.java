@@ -146,10 +146,6 @@ public class FlowableClientService {
      * {@link FlowableServiceException} is thrown with the error message received from the client, if possible.
      */
     public JsonNode executeRequest(HttpUriRequest request, String userName, String password, int expectedStatusCode) {
-        LOGGER.warn("RUSTY request method: {}", request.getMethod());
-        LOGGER.warn("RUSTY request uri: {}", request.getURI().toString());
-        
-        LOGGER.warn("RUSTY tenant filtering is " + enableTenantFiltering);
         if (enableTenantFiltering) {
             final String tenantId = SecurityUtils.getCurrentUserObject().getTenantId();
 
