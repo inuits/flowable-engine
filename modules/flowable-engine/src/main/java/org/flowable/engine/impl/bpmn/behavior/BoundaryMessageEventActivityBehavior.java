@@ -24,11 +24,12 @@ import org.flowable.common.engine.impl.context.Context;
 import org.flowable.common.engine.impl.interceptor.CommandContext;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.event.impl.FlowableEventBuilder;
-import org.flowable.engine.impl.persistence.entity.EventSubscriptionEntity;
-import org.flowable.engine.impl.persistence.entity.EventSubscriptionEntityManager;
 import org.flowable.engine.impl.persistence.entity.ExecutionEntity;
-import org.flowable.engine.impl.persistence.entity.MessageEventSubscriptionEntity;
 import org.flowable.engine.impl.util.CommandContextUtil;
+import org.flowable.engine.impl.util.CountingEntityUtil;
+import org.flowable.eventsubscription.service.EventSubscriptionService;
+import org.flowable.eventsubscription.service.impl.persistence.entity.EventSubscriptionEntity;
+import org.flowable.eventsubscription.service.impl.persistence.entity.MessageEventSubscriptionEntity;
 
 /**
  * @author Tijs Rademakers
@@ -57,8 +58,19 @@ public class BoundaryMessageEventActivityBehavior extends BoundaryEventActivityB
                     .createExpression(messageEventDefinition.getMessageExpression());
             messageName = messageExpression.getValue(execution).toString();
         }
-
-        CommandContextUtil.getEventSubscriptionEntityManager(commandContext).insertMessageEvent(messageName, executionEntity);
+        
+        EventSubscriptionEntity eventSubscription = (EventSubscriptionEntity) CommandContextUtil.getEventSubscriptionService(commandContext).createEventSubscriptionBuilder()
+                        .eventType(MessageEventSubscriptionEntity.EVENT_TYPE)
+                        .eventName(messageEventDefinition.getMessageRef())
+                        .executionId(executionEntity.getId())
+                        .processInstanceId(executionEntity.getProcessInstanceId())
+                        .activityId(executionEntity.getCurrentActivityId())
+                        .processDefinitionId(executionEntity.getProcessDefinitionId())
+                        .tenantId(executionEntity.getTenantId())
+                        .create();
+        
+        CountingEntityUtil.handleInsertEventSubscriptionEntityCount(eventSubscription);
+        executionEntity.getEventSubscriptions().add(eventSubscription);
 
         FlowableEventDispatcher eventDispatcher = CommandContextUtil.getProcessEngineConfiguration(commandContext).getEventDispatcher();
         if (eventDispatcher != null && eventDispatcher.isEnabled()) {
@@ -74,12 +86,13 @@ public class BoundaryMessageEventActivityBehavior extends BoundaryEventActivityB
         BoundaryEvent boundaryEvent = (BoundaryEvent) execution.getCurrentFlowElement();
 
         if (boundaryEvent.isCancelActivity()) {
-            EventSubscriptionEntityManager eventSubscriptionEntityManager = CommandContextUtil.getEventSubscriptionEntityManager();
+            EventSubscriptionService eventSubscriptionService = CommandContextUtil.getEventSubscriptionService();
             List<EventSubscriptionEntity> eventSubscriptions = executionEntity.getEventSubscriptions();
             for (EventSubscriptionEntity eventSubscription : eventSubscriptions) {
                 if (eventSubscription instanceof MessageEventSubscriptionEntity && eventSubscription.getEventName().equals(messageEventDefinition.getMessageRef())) {
 
-                    eventSubscriptionEntityManager.delete(eventSubscription);
+                    eventSubscriptionService.deleteEventSubscription(eventSubscription);
+                    CountingEntityUtil.handleDeleteEventSubscriptionEntityCount(eventSubscription);
                 }
             }
         }
