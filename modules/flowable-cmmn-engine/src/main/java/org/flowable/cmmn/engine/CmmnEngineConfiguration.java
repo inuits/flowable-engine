@@ -60,6 +60,7 @@ import org.flowable.cmmn.engine.impl.deployer.CmmnDeployer;
 import org.flowable.cmmn.engine.impl.deployer.CmmnDeploymentManager;
 import org.flowable.cmmn.engine.impl.el.CmmnExpressionManager;
 import org.flowable.cmmn.engine.impl.form.DefaultFormFieldHandler;
+import org.flowable.cmmn.engine.impl.function.IsStageCompletableExpressionFunction;
 import org.flowable.cmmn.engine.impl.history.CmmnHistoryManager;
 import org.flowable.cmmn.engine.impl.history.CmmnHistoryTaskManager;
 import org.flowable.cmmn.engine.impl.history.CmmnHistoryVariableManager;
@@ -83,6 +84,7 @@ import org.flowable.cmmn.engine.impl.history.async.json.transformer.PlanItemInst
 import org.flowable.cmmn.engine.impl.history.async.json.transformer.PlanItemInstanceDisabledHistoryJsonTransformer;
 import org.flowable.cmmn.engine.impl.history.async.json.transformer.PlanItemInstanceEnabledHistoryJsonTransformer;
 import org.flowable.cmmn.engine.impl.history.async.json.transformer.PlanItemInstanceExitHistoryJsonTransformer;
+import org.flowable.cmmn.engine.impl.history.async.json.transformer.PlanItemInstanceFullHistoryJsonTransformer;
 import org.flowable.cmmn.engine.impl.history.async.json.transformer.PlanItemInstanceOccurredHistoryJsonTransformer;
 import org.flowable.cmmn.engine.impl.history.async.json.transformer.PlanItemInstanceStartedHistoryJsonTransformer;
 import org.flowable.cmmn.engine.impl.history.async.json.transformer.PlanItemInstanceSuspendedHistoryJsonTransformer;
@@ -118,6 +120,7 @@ import org.flowable.cmmn.engine.impl.parser.handler.PlanFragmentParseHandler;
 import org.flowable.cmmn.engine.impl.parser.handler.ProcessTaskParseHandler;
 import org.flowable.cmmn.engine.impl.parser.handler.ScriptTaskParseHandler;
 import org.flowable.cmmn.engine.impl.parser.handler.ServiceTaskParseHandler;
+import org.flowable.cmmn.engine.impl.parser.handler.SignalEventListenerParseHandler;
 import org.flowable.cmmn.engine.impl.parser.handler.StageParseHandler;
 import org.flowable.cmmn.engine.impl.parser.handler.TaskParseHandler;
 import org.flowable.cmmn.engine.impl.parser.handler.TimerEventListenerParseHandler;
@@ -220,6 +223,8 @@ import org.flowable.common.engine.impl.scripting.ScriptBindingsFactory;
 import org.flowable.common.engine.impl.scripting.ScriptingEngines;
 import org.flowable.entitylink.service.EntityLinkServiceConfiguration;
 import org.flowable.entitylink.service.impl.db.EntityLinkDbSchemaManager;
+import org.flowable.eventsubscription.service.EventSubscriptionServiceConfiguration;
+import org.flowable.eventsubscription.service.impl.db.EventSubscriptionDbSchemaManager;
 import org.flowable.form.api.FormFieldHandler;
 import org.flowable.identitylink.service.IdentityLinkEventHandler;
 import org.flowable.identitylink.service.IdentityLinkServiceConfiguration;
@@ -377,6 +382,7 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
 
     protected SchemaManager identityLinkSchemaManager;
     protected SchemaManager entityLinkSchemaManager;
+    protected SchemaManager eventSubscriptionSchemaManager;
     protected SchemaManager variableSchemaManager;
     protected SchemaManager taskSchemaManager;
     protected SchemaManager jobSchemaManager;
@@ -398,6 +404,9 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
     // Entitylink support
     protected EntityLinkServiceConfiguration entityLinkServiceConfiguration;
     protected boolean enableEntityLinks;
+    
+    // EventSubscription support
+    protected EventSubscriptionServiceConfiguration eventSubscriptionServiceConfiguration;
 
     // Task support
     protected TaskServiceConfiguration taskServiceConfiguration;
@@ -682,6 +691,7 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
     protected List<HistoryJsonTransformer> customHistoryJsonTransformers;
 
     protected FormFieldHandler formFieldHandler;
+    protected boolean isFormFieldValidationEnabled;
 
     protected BusinessCalendarManager businessCalendarManager;
 
@@ -780,6 +790,7 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
         initClock();
         initIdentityLinkServiceConfiguration();
         initEntityLinkServiceConfiguration();
+        initEventSubscriptionServiceConfiguration();
         initVariableServiceConfiguration();
         configuratorsAfterInit();
         initTaskServiceConfiguration();
@@ -807,6 +818,7 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
         if (executeServiceSchemaManagers) {
             initIdentityLinkSchemaManager();
             initEntityLinkSchemaManager();
+            initEventSubscriptionSchemaManager();
             initVariableSchemaManager();
             initTaskSchemaManager();
             initJobSchemaManager();
@@ -850,6 +862,12 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
             this.entityLinkSchemaManager = new EntityLinkDbSchemaManager();
         }
     }
+    
+    protected void initEventSubscriptionSchemaManager() {
+        if (this.eventSubscriptionSchemaManager == null) {
+            this.eventSubscriptionSchemaManager = new EventSubscriptionDbSchemaManager();
+        }
+    }
 
     protected void initJobSchemaManager() {
         if (this.jobSchemaManager == null) {
@@ -885,16 +903,15 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
             shortHandExpressionFunctions.add(new VariableLowerThanOrEqualsExpressionFunction(variableScopeName));
             shortHandExpressionFunctions.add(new VariableGreaterThanExpressionFunction(variableScopeName));
             shortHandExpressionFunctions.add(new VariableGreaterThanOrEqualsExpressionFunction(variableScopeName));
+
+            shortHandExpressionFunctions.add(new IsStageCompletableExpressionFunction());
         }
     }
     
     public void initFunctionDelegates() {
         if (flowableFunctionDelegates == null) {
             flowableFunctionDelegates = new ArrayList<>();
-            
-            for (FlowableShortHandExpressionFunction expressionFunction : shortHandExpressionFunctions) {
-                flowableFunctionDelegates.add(expressionFunction);
-            }
+            flowableFunctionDelegates.addAll(shortHandExpressionFunctions);
         }
         
         if (customFlowableFunctionDelegates != null) {
@@ -905,11 +922,7 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
     public void initExpressionEnhancers() {
         if (expressionEnhancers == null) {
             expressionEnhancers = new ArrayList<>();
-            
-            for (FlowableShortHandExpressionFunction expressionFunction : shortHandExpressionFunctions) {
-                expressionEnhancers.add(expressionFunction);
-            }
-            
+            expressionEnhancers.addAll(shortHandExpressionFunctions);
         }
         
         if (customExpressionEnhancers != null) {
@@ -1169,6 +1182,7 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
         cmmnParseHandlers.add(new HttpTaskParseHandler());
         cmmnParseHandlers.add(new TaskParseHandler());
         cmmnParseHandlers.add(new GenericEventListenerParseHandler());
+        cmmnParseHandlers.add(new SignalEventListenerParseHandler());
         cmmnParseHandlers.add(new TimerEventListenerParseHandler());
         cmmnParseHandlers.add(new UserEventListenerParseHandler());
 
@@ -1336,7 +1350,7 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
         if (this.internalHistoryVariableManager != null) {
             this.variableServiceConfiguration.setInternalHistoryVariableManager(this.internalHistoryVariableManager);
         } else {
-            this.variableServiceConfiguration.setInternalHistoryVariableManager(new CmmnHistoryVariableManager(cmmnHistoryManager));
+            this.variableServiceConfiguration.setInternalHistoryVariableManager(new CmmnHistoryVariableManager(this));
         }
 
         this.variableServiceConfiguration.setMaxLengthString(this.getMaxLengthString());
@@ -1368,7 +1382,7 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
         if (this.internalHistoryTaskManager != null) {
             this.taskServiceConfiguration.setInternalHistoryTaskManager(this.internalHistoryTaskManager);
         } else {
-            this.taskServiceConfiguration.setInternalHistoryTaskManager(new CmmnHistoryTaskManager(cmmnHistoryManager));
+            this.taskServiceConfiguration.setInternalHistoryTaskManager(new CmmnHistoryTaskManager(this));
         }
 
         if (this.internalTaskVariableScopeResolver != null) {
@@ -1433,6 +1447,21 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
 
     protected EntityLinkServiceConfiguration instantiateEntityLinkServiceConfiguration() {
         return new EntityLinkServiceConfiguration();
+    }
+    
+    public void initEventSubscriptionServiceConfiguration() {
+        this.eventSubscriptionServiceConfiguration = instantiateEventSubscriptionServiceConfiguration();
+        this.eventSubscriptionServiceConfiguration.setClock(this.clock);
+        this.eventSubscriptionServiceConfiguration.setObjectMapper(this.objectMapper);
+        this.eventSubscriptionServiceConfiguration.setEventDispatcher(this.eventDispatcher);
+        
+        this.eventSubscriptionServiceConfiguration.init();
+
+        addServiceConfiguration(EngineConfigurationConstants.KEY_EVENT_SUBSCRIPTION_SERVICE_CONFIG, this.eventSubscriptionServiceConfiguration);
+    }
+    
+    protected EventSubscriptionServiceConfiguration instantiateEventSubscriptionServiceConfiguration() {
+        return new EventSubscriptionServiceConfiguration();
     }
 
     public void initBusinessCalendarManager() {
@@ -1511,6 +1540,7 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
         historyJsonTransformers.add(new TaskUpdatedHistoryJsonTransformer());
         historyJsonTransformers.add(new TaskEndedHistoryJsonTransformer());
         
+        historyJsonTransformers.add(new PlanItemInstanceFullHistoryJsonTransformer());
         historyJsonTransformers.add(new PlanItemInstanceAvailableHistoryJsonTransformer());
         historyJsonTransformers.add(new PlanItemInstanceCompletedHistoryJsonTransformer());
         historyJsonTransformers.add(new PlanItemInstanceCreatedHistoryJsonTransformer());
@@ -2220,7 +2250,7 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
             planItemInstanceLifecycleListeners = new HashMap<>();
         }
         planItemInstanceLifecycleListeners
-            .computeIfAbsent(planItemDefinitionType, key -> new ArrayList<PlanItemInstanceLifecycleListener>())
+            .computeIfAbsent(planItemDefinitionType, key -> new ArrayList<>())
             .add(planItemInstanceLifeCycleListener);
     }
 
@@ -2362,6 +2392,15 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
 
     public CmmnEngineConfiguration setEntityLinkSchemaManager(SchemaManager entityLinkSchemaManager) {
         this.entityLinkSchemaManager = entityLinkSchemaManager;
+        return this;
+    }
+
+    public SchemaManager getEventSubscriptionSchemaManager() {
+        return eventSubscriptionSchemaManager;
+    }
+
+    public CmmnEngineConfiguration setEventSubscriptionSchemaManager(SchemaManager eventSubscriptionSchemaManager) {
+        this.eventSubscriptionSchemaManager = eventSubscriptionSchemaManager;
         return this;
     }
 
@@ -3256,6 +3295,15 @@ public class CmmnEngineConfiguration extends AbstractEngineConfiguration impleme
 
     public CmmnEngineConfiguration setFormFieldHandler(FormFieldHandler formFieldHandler) {
         this.formFieldHandler = formFieldHandler;
+        return this;
+    }
+
+    public boolean isFormFieldValidationEnabled() {
+        return this.isFormFieldValidationEnabled;
+    }
+
+    public CmmnEngineConfiguration setFormFieldValidationEnabled(boolean flag) {
+        this.isFormFieldValidationEnabled = flag;
         return this;
     }
 

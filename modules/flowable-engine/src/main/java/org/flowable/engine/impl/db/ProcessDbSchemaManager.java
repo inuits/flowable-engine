@@ -30,6 +30,7 @@ public class ProcessDbSchemaManager extends AbstractSqlScriptBasedDbSchemaManage
     
     protected static final Pattern CLEAN_VERSION_REGEX = Pattern.compile("\\d\\.\\d*");
     
+    @Override
     public void schemaCheckVersion() {
         try {
             String dbVersion = getDbVersion();
@@ -85,6 +86,7 @@ public class ProcessDbSchemaManager extends AbstractSqlScriptBasedDbSchemaManage
         getCommonSchemaManager().schemaCreate();
         getIdentityLinkSchemaManager().schemaCreate();
         getEntityLinkSchemaManager().schemaCreate();
+        getEventSubscriptionSchemaManager().schemaCreate();
         getTaskSchemaManager().schemaCreate();
         getVariableSchemaManager().schemaCreate();
         getJobSchemaManager().schemaCreate();
@@ -143,15 +145,21 @@ public class ProcessDbSchemaManager extends AbstractSqlScriptBasedDbSchemaManage
         }
         
         try {
-            getIdentityLinkSchemaManager().schemaDrop();
+            getEventSubscriptionSchemaManager().schemaDrop();
         } catch (Exception e) {
-            logger.info("Error dropping identity link tables", e);
+            logger.info("Error dropping event subscription tables", e);
         }
         
         try {
             getEntityLinkSchemaManager().schemaDrop();
         } catch (Exception e) {
             logger.info("Error dropping entity link tables", e);
+        }
+        
+        try {
+            getIdentityLinkSchemaManager().schemaDrop();
+        } catch (Exception e) {
+            logger.info("Error dropping identity link tables", e);
         }
         
         try {
@@ -200,6 +208,7 @@ public class ProcessDbSchemaManager extends AbstractSqlScriptBasedDbSchemaManage
         getCommonSchemaManager().schemaUpdate();
         getIdentityLinkSchemaManager().schemaUpdate();
         getEntityLinkSchemaManager().schemaUpdate();
+        getEventSubscriptionSchemaManager().schemaUpdate();
         getTaskSchemaManager().schemaUpdate();
         getVariableSchemaManager().schemaUpdate();
         getJobSchemaManager().schemaUpdate();
@@ -258,31 +267,6 @@ public class ProcessDbSchemaManager extends AbstractSqlScriptBasedDbSchemaManage
         return isTablePresent("ACT_HI_PROCINST");
     }
 
-    protected boolean isUpgradeNeeded(String versionInDatabase) {
-        if (ProcessEngine.VERSION.equals(versionInDatabase)) {
-            return false;
-        }
-
-        String cleanDbVersion = getCleanVersion(versionInDatabase);
-        String[] cleanDbVersionSplitted = cleanDbVersion.split("\\.");
-        int dbMajorVersion = Integer.valueOf(cleanDbVersionSplitted[0]);
-        int dbMinorVersion = Integer.valueOf(cleanDbVersionSplitted[1]);
-
-        String cleanEngineVersion = getCleanVersion(ProcessEngine.VERSION);
-        String[] cleanEngineVersionSplitted = cleanEngineVersion.split("\\.");
-        int engineMajorVersion = Integer.valueOf(cleanEngineVersionSplitted[0]);
-        int engineMinorVersion = Integer.valueOf(cleanEngineVersionSplitted[1]);
-
-        if ((dbMajorVersion > engineMajorVersion) || ((dbMajorVersion <= engineMajorVersion) && (dbMinorVersion > engineMinorVersion))) {
-            throw new FlowableException("Version of flowable database (" + versionInDatabase + ") is more recent than the engine (" + ProcessEngine.VERSION + ")");
-        } else if (cleanDbVersion.compareTo(cleanEngineVersion) == 0) {
-            // Versions don't match exactly, possibly snapshot is being used
-            logger.warn("Engine-version is the same, but not an exact match: {} vs. {}. Not performing database-upgrade.", versionInDatabase, ProcessEngine.VERSION);
-            return false;
-        }
-        return true;
-    }
-
     protected String getCleanVersion(String versionString) {
         Matcher matcher = CLEAN_VERSION_REGEX.matcher(versionString);
         if (!matcher.find()) {
@@ -337,6 +321,10 @@ public class ProcessDbSchemaManager extends AbstractSqlScriptBasedDbSchemaManage
     
     protected SchemaManager getEntityLinkSchemaManager() {
         return CommandContextUtil.getProcessEngineConfiguration().getEntityLinkSchemaManager();
+    }
+    
+    protected SchemaManager getEventSubscriptionSchemaManager() {
+        return CommandContextUtil.getProcessEngineConfiguration().getEventSubscriptionSchemaManager();
     }
     
     protected SchemaManager getVariableSchemaManager() {

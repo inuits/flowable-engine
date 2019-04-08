@@ -247,6 +247,11 @@ public abstract class AbstractEngineConfiguration {
     protected boolean tablePrefixIsSchema;
     
     /**
+     * Set to true if the latest version of a definition should be retrieved, ignoring a possible parent deployment id value
+     */
+    protected boolean alwaysLookupLatestDefinitionVersion;
+    
+    /**
      * Set to true if by default lookups should fallback to the default tenant (an empty string by default or a defined tenant value)
      */
     protected boolean fallbackToDefaultTenant;
@@ -825,7 +830,7 @@ public abstract class AbstractEngineConfiguration {
             }
 
             if (nrOfServiceLoadedConfigurators > 0) {
-                logger.info("Found {} auto-discoverable Process Engine Configurator{}", nrOfServiceLoadedConfigurators++, nrOfServiceLoadedConfigurators > 1 ? "s" : "");
+                logger.info("Found {} auto-discoverable Process Engine Configurator{}", nrOfServiceLoadedConfigurators, nrOfServiceLoadedConfigurators > 1 ? "s" : "");
             }
 
             if (!allConfigurators.isEmpty()) {
@@ -1347,6 +1352,14 @@ public abstract class AbstractEngineConfiguration {
         return customSessionFactories;
     }
 
+    public AbstractEngineConfiguration addCustomSessionFactory(SessionFactory sessionFactory) {
+        if (customSessionFactories == null) {
+            customSessionFactories = new ArrayList<>();
+        }
+        customSessionFactories.add(sessionFactory);
+        return this;
+    }
+
     public AbstractEngineConfiguration setCustomSessionFactories(List<SessionFactory> customSessionFactories) {
         this.customSessionFactories = customSessionFactories;
         return this;
@@ -1412,6 +1425,15 @@ public abstract class AbstractEngineConfiguration {
 
     public AbstractEngineConfiguration setTablePrefixIsSchema(boolean tablePrefixIsSchema) {
         this.tablePrefixIsSchema = tablePrefixIsSchema;
+        return this;
+    }
+
+    public boolean isAlwaysLookupLatestDefinitionVersion() {
+        return alwaysLookupLatestDefinitionVersion;
+    }
+
+    public AbstractEngineConfiguration setAlwaysLookupLatestDefinitionVersion(boolean alwaysLookupLatestDefinitionVersion) {
+        this.alwaysLookupLatestDefinitionVersion = alwaysLookupLatestDefinitionVersion;
         return this;
     }
 

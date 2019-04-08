@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,8 +44,9 @@ public class DeploymentResourceDataResource extends BaseDeploymentResourceDataRe
     @GetMapping("/repository/deployments/{deploymentId}/resourcedata/{resourceName}")
      public byte[] getDeploymentResource(@ApiParam(name = "deploymentId") @PathVariable("deploymentId") String deploymentId,
             @ApiParam(name = "resourceName", value = "The name of the resource to get. Make sure you URL-encode the resourceName in case it contains forward slashes. Eg: use diagrams%2Fmy-process.bpmn20.xml instead of diagrams/my-process.bpmn20.xml.") @PathVariable("resourceName") String resourceName,
+            @RequestHeader(required = false, value = "x-tenant") String tenantId,
             HttpServletResponse response) {
 
-        return getDeploymentResourceData(deploymentId, resourceName, response);
+        return getDeploymentResourceData(deploymentId, resourceName, response, tenantId);
     }
 }

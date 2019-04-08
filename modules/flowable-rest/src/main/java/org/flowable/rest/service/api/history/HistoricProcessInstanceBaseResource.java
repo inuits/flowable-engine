@@ -180,7 +180,7 @@ public class HistoricProcessInstanceBaseResource {
         DataResponse<HistoricProcessInstanceResponse> responseList = paginateList(allRequestParams, queryRequest, query, "processInstanceId", allowedSortProperties,
                 restResponseFactory::createHistoricProcessInstanceResponseList);
         
-        Set<String> processDefinitionIds = new HashSet<String>();
+        Set<String> processDefinitionIds = new HashSet<>();
         List<HistoricProcessInstanceResponse> processInstanceList = responseList.getData();
         for (HistoricProcessInstanceResponse processInstanceResponse : processInstanceList) {
             if (!processDefinitionIds.contains(processInstanceResponse.getProcessDefinitionId())) {
@@ -190,7 +190,7 @@ public class HistoricProcessInstanceBaseResource {
         
         if (processDefinitionIds.size() > 0) {
             List<ProcessDefinition> processDefinitionList = repositoryService.createProcessDefinitionQuery().processDefinitionIds(processDefinitionIds).list();
-            Map<String, ProcessDefinition> processDefinitionMap = new HashMap<String, ProcessDefinition>();
+            Map<String, ProcessDefinition> processDefinitionMap = new HashMap<>();
             for (ProcessDefinition processDefinition : processDefinitionList) {
                 processDefinitionMap.put(processDefinition.getId(), processDefinition);
             }
@@ -208,7 +208,17 @@ public class HistoricProcessInstanceBaseResource {
     }
     
     protected HistoricProcessInstance getHistoricProcessInstanceFromRequest(String processInstanceId) {
-        HistoricProcessInstance processInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
+        return getHistoricProcessInstanceFromRequest(processInstanceId, null);
+    }
+    
+    protected HistoricProcessInstance getHistoricProcessInstanceFromRequest(String processInstanceId, String tenantId) {
+        final HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery();
+        
+        if (tenantId != null) {
+            historicProcessInstanceQuery.processInstanceTenantId(tenantId);
+        }
+        
+        HistoricProcessInstance processInstance = historicProcessInstanceQuery.processInstanceId(processInstanceId).singleResult();
         if (processInstance == null) {
             throw new FlowableObjectNotFoundException("Could not find a process instance with id '" + processInstanceId + "'.", HistoricProcessInstance.class);
         }

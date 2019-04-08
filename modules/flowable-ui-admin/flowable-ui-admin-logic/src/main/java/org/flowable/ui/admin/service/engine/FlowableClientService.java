@@ -12,10 +12,6 @@
  */
 package org.flowable.ui.admin.service.engine;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -54,11 +50,16 @@ import org.flowable.ui.admin.domain.ServerConfig;
 import org.flowable.ui.admin.service.AttachmentResponseInfo;
 import org.flowable.ui.admin.service.ResponseInfo;
 import org.flowable.ui.admin.service.engine.exception.FlowableServiceException;
+import org.flowable.ui.common.security.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Service for invoking Flowable REST services.
@@ -81,6 +82,9 @@ public class FlowableClientService {
 
     @Value("${flowable.admin.app.security.preemptive-basic-authentication:false}")
     boolean preemptiveBasicAuthentication;
+    
+    @Value("${flowable.admin.app.security.tenant-filtering:false}")
+    boolean enableTenantFiltering;
 
     public CloseableHttpClient getHttpClient(ServerConfig serverConfig) {
         return getHttpClient(serverConfig.getUserName(), serverConfigService.decrypt(serverConfig.getPassword()));
@@ -142,7 +146,18 @@ public class FlowableClientService {
      * {@link FlowableServiceException} is thrown with the error message received from the client, if possible.
      */
     public JsonNode executeRequest(HttpUriRequest request, String userName, String password, int expectedStatusCode) {
+        LOGGER.warn("RUSTY request method: {}", request.getMethod());
+        LOGGER.warn("RUSTY request uri: {}", request.getURI().toString());
+        
+        LOGGER.warn("RUSTY tenant filtering is " + enableTenantFiltering);
+        if (enableTenantFiltering) {
+            final String tenantId = SecurityUtils.getCurrentUserObject().getTenantId();
 
+            if (tenantId != null) {
+                request.addHeader("x-tenant", tenantId);
+            }
+        }
+        
         FlowableServiceException exception = null;
         CloseableHttpClient client = getHttpClient(userName, password);
         try {
@@ -590,6 +605,13 @@ public class FlowableClientService {
         }
 
         URIBuilder builder = createUriBuilder(finalUrl + uri);
+        
+        if (enableTenantFiltering) {
+            final String tenantId = SecurityUtils.getCurrentUserObject().getTenantId();
+            if (tenantId != null) {
+                builder.setParameter("tenantId", tenantId);
+            }
+        }
 
         return builder.toString();
     }

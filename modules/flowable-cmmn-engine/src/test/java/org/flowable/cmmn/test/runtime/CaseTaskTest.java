@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.flowable.cmmn.api.history.HistoricCaseInstance;
 import org.flowable.cmmn.api.runtime.CaseInstance;
+import org.flowable.cmmn.api.runtime.PlanItemDefinitionType;
 import org.flowable.cmmn.api.runtime.PlanItemInstance;
 import org.flowable.cmmn.api.runtime.PlanItemInstanceState;
 import org.flowable.cmmn.engine.test.CmmnDeployment;
@@ -99,6 +100,40 @@ public class CaseTaskTest extends FlowableCmmnTestCase {
         } finally {
             cmmnRepositoryService.deleteDeployment(parentCaseDeploymentId, true);
         }
+    }
+
+    @Test
+    @CmmnDeployment(resources = {
+        "org/flowable/cmmn/test/runtime/CaseTaskTest.testSimpleBlockingSubCase.cmmn",
+        "org/flowable/cmmn/test/runtime/CaseTaskTest.testSimpleBlockingSubCaseChildCase.cmmn"
+    })
+    public void testSimpleBlockingSubCase() {
+        CaseInstance caseInstance = cmmnRuntimeService.createCaseInstanceBuilder().caseDefinitionKey("endEndCase").start();
+
+        // Verify case task plan item instance
+        PlanItemInstance caseTaskPlanItemInstance = cmmnRuntimeService.createPlanItemInstanceQuery()
+            .planItemDefinitionType(PlanItemDefinitionType.CASE_TASK)
+            .singleResult();
+        assertEquals(PlanItemInstanceState.ACTIVE, caseTaskPlanItemInstance.getState());
+
+        // Verify child case instance
+        CaseInstance childCaseInstance = cmmnRuntimeService.createCaseInstanceQuery().caseInstanceParentId(caseInstance.getId()).singleResult();
+        PlanItemInstance humanTaskPlanItemInstance = cmmnRuntimeService.createPlanItemInstanceQuery()
+            .caseInstanceId(childCaseInstance.getId())
+            .planItemDefinitionType(PlanItemDefinitionType.HUMAN_TASK)
+            .singleResult();
+        assertEquals(PlanItemInstanceState.ACTIVE, humanTaskPlanItemInstance.getState());
+
+        PlanItemInstance stagePlanItemInstance = cmmnRuntimeService.createPlanItemInstanceQuery()
+            .caseInstanceId(childCaseInstance.getId())
+            .planItemDefinitionType(PlanItemDefinitionType.STAGE)
+            .singleResult();
+        assertEquals(PlanItemInstanceState.ACTIVE, stagePlanItemInstance.getState());
+
+        // Completing the task should complete both case instances
+        cmmnTaskService.complete(cmmnTaskService.createTaskQuery().caseInstanceId(childCaseInstance.getId()).singleResult().getId());
+        assertCaseInstanceEnded(childCaseInstance);
+        assertCaseInstanceEnded(caseInstance);
     }
     
     @Test
@@ -478,6 +513,29 @@ public class CaseTaskTest extends FlowableCmmnTestCase {
         this.expectedException.expect(FlowableObjectNotFoundException.class);
         this.expectedException.expectMessage("Case definition was not found by key 'oneTaskCase' and tenant 'flowable'");
         assertBlockingCaseTaskFlow(caseInstance);
+    }
+
+    @Test
+    public void testEntityLinksAreDeleted() {
+        String deploymentId = cmmnRepositoryService.createDeployment()
+            .addClasspathResource("org/flowable/cmmn/test/runtime/oneHumanTaskCase.cmmn").deploy().getId();
+
+        CaseInstance caseInstance = cmmnRuntimeService.createCaseInstanceBuilder().caseDefinitionKey("oneHumanTaskCase").start();
+        try {
+            Task task = cmmnTaskService.createTaskQuery().caseInstanceId(caseInstance.getId()).singleResult();
+            assertEquals("Sub task", task.getName());
+
+            assertEquals(1, cmmnRuntimeService.getEntityLinkChildrenForCaseInstance(caseInstance.getId()).size());
+            assertEquals(1, cmmnHistoryService.getHistoricEntityLinkChildrenForCaseInstance(caseInstance.getId()).size());
+
+            cmmnTaskService.complete(task.getId());
+
+            assertEquals(1, cmmnHistoryService.getHistoricEntityLinkChildrenForCaseInstance(caseInstance.getId()).size());
+        } finally {
+            cmmnRepositoryService.deleteDeployment(deploymentId, true);
+        }
+
+        assertEquals(0, cmmnHistoryService.getHistoricEntityLinkChildrenForCaseInstance(caseInstance.getId()).size());
     }
 
 }
