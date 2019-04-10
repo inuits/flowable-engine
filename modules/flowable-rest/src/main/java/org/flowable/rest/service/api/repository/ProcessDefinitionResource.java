@@ -13,12 +13,7 @@
 
 package org.flowable.rest.service.api.repository;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Authorization;
+import java.util.Date;
 
 import org.flowable.common.engine.api.FlowableIllegalArgumentException;
 import org.flowable.common.rest.exception.FlowableConflictException;
@@ -27,10 +22,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 
 /**
  * @author Frederik Heremans
@@ -45,8 +45,8 @@ public class ProcessDefinitionResource extends BaseProcessDefinitionResource {
             @ApiResponse(code = 404, message = "Indicates the requested process definition was not found.")
     })
     @GetMapping(value = "/repository/process-definitions/{processDefinitionId}", produces = "application/json")
-    public ProcessDefinitionResponse getProcessDefinition(@ApiParam(name = "processDefinitionId") @PathVariable String processDefinitionId, HttpServletRequest request) {
-        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId);
+    public ProcessDefinitionResponse getProcessDefinition(@ApiParam(name = "processDefinitionId") @PathVariable String processDefinitionId, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
+        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId, tenantId);
 
         return restResponseFactory.createProcessDefinitionResponse(processDefinition);
     }
@@ -64,13 +64,13 @@ public class ProcessDefinitionResource extends BaseProcessDefinitionResource {
     public ProcessDefinitionResponse executeProcessDefinitionAction(
             @ApiParam(name = "processDefinitionId") @PathVariable String processDefinitionId,
             @ApiParam(required = true) @RequestBody ProcessDefinitionActionRequest actionRequest,
-            HttpServletRequest request) {
+            @RequestHeader(required = false, value = "x-tenant") String tenantId) {
 
         if (actionRequest == null) {
             throw new FlowableIllegalArgumentException("No action found in request body.");
         }
 
-        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId);
+        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId, tenantId);
 
         if (actionRequest.getCategory() != null) {
             // Update of category required

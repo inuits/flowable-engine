@@ -13,7 +13,6 @@
 
 package org.flowable.rest.service.api.history;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.flowable.engine.HistoryService;
@@ -24,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
@@ -51,8 +51,8 @@ public class HistoricTaskInstanceResource extends HistoricTaskInstanceBaseResour
             @ApiResponse(code = 200, message = "Indicates that the historic task instances could be found."),
             @ApiResponse(code = 404, message = "Indicates that the historic task instances could not be found.") })
     @GetMapping(value = "/history/historic-task-instances/{taskId}", produces = "application/json")
-    public HistoricTaskInstanceResponse getTaskInstance(@ApiParam(name = "taskId") @PathVariable String taskId, HttpServletRequest request) {
-        return restResponseFactory.createHistoricTaskInstanceResponse(getHistoricTaskInstanceFromRequest(taskId));
+    public HistoricTaskInstanceResponse getTaskInstance(@ApiParam(name = "taskId") @PathVariable String taskId, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
+        return restResponseFactory.createHistoricTaskInstanceResponse(getHistoricTaskInstanceFromRequest(taskId, tenantId));
     }
 
     @ApiOperation(value = "Delete a historic task instance", tags = { "History Task" }, notes = "")
@@ -60,8 +60,8 @@ public class HistoricTaskInstanceResource extends HistoricTaskInstanceBaseResour
             @ApiResponse(code = 204, message = "Indicates that the historic task instance was deleted."),
             @ApiResponse(code = 404, message = "Indicates that the historic task instance could not be found.") })
     @DeleteMapping(value = "/history/historic-task-instances/{taskId}")
-    public void deleteTaskInstance(@ApiParam(name = "taskId") @PathVariable String taskId, HttpServletResponse response) {
-        HistoricTaskInstance task = getHistoricTaskInstanceFromRequest(taskId);
+    public void deleteTaskInstance(@ApiParam(name = "taskId") @PathVariable String taskId, @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletResponse response) {
+        HistoricTaskInstance task = getHistoricTaskInstanceFromRequest(taskId, tenantId);
         
         if (restApiInterceptor != null) {
             restApiInterceptor.deleteHistoricTask(task);

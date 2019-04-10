@@ -21,11 +21,13 @@ import org.flowable.common.engine.api.FlowableObjectNotFoundException;
 import org.flowable.common.rest.resolver.ContentTypeResolver;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.repository.Deployment;
+import org.flowable.engine.repository.DeploymentQuery;
 import org.flowable.rest.service.api.BpmnRestApiInterceptor;
 import org.flowable.rest.service.api.RestResponseFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
@@ -61,9 +63,16 @@ public class DeploymentResourceCollectionResource {
             @ApiResponse(code = 404, message = "Indicates the requested deployment was not found.")
     })
     @GetMapping(value = "/repository/deployments/{deploymentId}/resources", produces = "application/json")
-    public List<DeploymentResourceResponse> getDeploymentResources(@ApiParam(name = "deploymentId") @PathVariable String deploymentId, HttpServletRequest request) {
+    public List<DeploymentResourceResponse> getDeploymentResources(@ApiParam(name = "deploymentId") @PathVariable String deploymentId, @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletRequest request) {
         // Check if deployment exists
-        Deployment deployment = repositoryService.createDeploymentQuery().deploymentId(deploymentId).singleResult();
+        DeploymentQuery deploymentQuery = repositoryService.createDeploymentQuery().deploymentId(deploymentId);
+
+        if (tenantId != null) {
+            deploymentQuery.deploymentTenantId(tenantId);
+        }
+
+        Deployment deployment = deploymentQuery.singleResult();
+        
         if (deployment == null) {
             throw new FlowableObjectNotFoundException("Could not find a deployment with id '" + deploymentId + "'.", Deployment.class);
         }

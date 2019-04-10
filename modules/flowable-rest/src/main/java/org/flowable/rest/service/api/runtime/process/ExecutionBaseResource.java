@@ -189,9 +189,17 @@ public class ExecutionBaseResource {
             }
         }
     }
-
+    
     protected Execution getExecutionFromRequest(String executionId) {
-        Execution execution = runtimeService.createExecutionQuery().executionId(executionId).singleResult();
+        return getExecutionFromRequest(executionId, null);
+    }
+
+    protected Execution getExecutionFromRequest(String executionId, String tenantId) {
+        final ExecutionQuery executionQuery = runtimeService.createExecutionQuery();
+        if (tenantId != null) {
+            executionQuery.executionTenantId(tenantId);
+        }
+        Execution execution = executionQuery.executionId(executionId).singleResult();
         if (execution == null) {
             throw new FlowableObjectNotFoundException("Could not find an execution with id '" + executionId + "'.", Execution.class);
         }
