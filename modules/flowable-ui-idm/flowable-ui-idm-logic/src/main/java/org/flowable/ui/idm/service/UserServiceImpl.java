@@ -26,6 +26,8 @@ import org.flowable.ui.common.service.exception.BadRequestException;
 import org.flowable.ui.common.service.exception.ConflictingRequestException;
 import org.flowable.ui.common.service.exception.NotFoundException;
 import org.flowable.ui.idm.model.UserInformation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class UserServiceImpl extends AbstractIdmService implements UserService {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private static final int MAX_USER_SIZE = 100;
 
@@ -121,7 +125,13 @@ public class UserServiceImpl extends AbstractIdmService implements UserService {
             throw new BadRequestException("Id, password and first name are required");
         }
 
-        if (email != null && identityService.createUserQuery().userEmail(email).count() > 0) {
+        if (StringUtils.isNotBlank(email) && identityService.createUserQuery().userEmail(email).count() > 0) {
+            LOGGER.error("INUITS FIX: User with email '{}' already exists", email);
+            throw new ConflictingRequestException("User already registered", "ACCOUNT.SIGNUP.ERROR.ALREADY-REGISTERED");
+        }
+        
+        if (identityService.createUserQuery().userId(id).count() > 0) {
+            LOGGER.error("INUITS FIX: User with id '{}' already exists", id);
             throw new ConflictingRequestException("User already registered", "ACCOUNT.SIGNUP.ERROR.ALREADY-REGISTERED");
         }
 
