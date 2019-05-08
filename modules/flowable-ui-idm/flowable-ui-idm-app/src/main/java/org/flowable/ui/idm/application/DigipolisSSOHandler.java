@@ -18,6 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 @Component
@@ -97,9 +99,15 @@ public class DigipolisSSOHandler implements SSOHandler {
         );
 
         RestTemplate template = new RestTemplate();
-        String s = template.postForObject(ssoTokenUrl,
-            getHttpEntity(json),
-            String.class);
+        String s;
+        try {
+            s = template.postForObject(ssoTokenUrl,
+                getHttpEntity(json),
+                String.class);
+        } catch (RestClientResponseException e) {
+            LOGGER.error("INUITS Could not obtain access token: {}: {}", e.getRawStatusCode(), e.getResponseBodyAsString());
+            throw e;
+        }
 
         JSONObject response = new JSONObject(s);
         return response.getString("access_token");
