@@ -12,6 +12,8 @@
  */
 package org.flowable.ui.task.model.runtime;
 
+import java.util.Map;
+
 import org.flowable.ui.common.model.AbstractRepresentation;
 
 /**
@@ -24,6 +26,7 @@ public class CreateTaskRepresentation extends AbstractRepresentation {
     protected String category;
     protected String assignee;
     protected String parentTaskId;
+    protected String tenantId;
 
     public String getName() {
         return name;
@@ -63,5 +66,13 @@ public class CreateTaskRepresentation extends AbstractRepresentation {
 
     public void setParentTaskId(String parentTaskId) {
         this.parentTaskId = parentTaskId;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 }

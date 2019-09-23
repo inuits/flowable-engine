@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -44,8 +45,8 @@ public class ModelResource extends BaseModelResource {
             @ApiResponse(code = 404, message = "Indicates the requested model was not found.")
     })
     @GetMapping(value = "/repository/models/{modelId}", produces = "application/json")
-    public ModelResponse getModel(@ApiParam(name = "modelId") @PathVariable String modelId, HttpServletRequest request) {
-        Model model = getModelFromRequest(modelId);
+    public ModelResponse getModel(@ApiParam(name = "modelId") @PathVariable String modelId, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
+        Model model = getModelFromRequest(modelId, tenantId);
 
         return restResponseFactory.createModelResponse(model);
     }
@@ -58,8 +59,8 @@ public class ModelResource extends BaseModelResource {
             @ApiResponse(code = 404, message = "Indicates the requested model was not found.")
     })
     @PutMapping(value = "/repository/models/{modelId}", produces = "application/json")
-    public ModelResponse updateModel(@ApiParam(name = "modelId") @PathVariable String modelId, @RequestBody ModelRequest modelRequest, HttpServletRequest request) {
-        Model model = getModelFromRequest(modelId);
+    public ModelResponse updateModel(@ApiParam(name = "modelId") @PathVariable String modelId, @RequestBody ModelRequest modelRequest, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
+        Model model = getModelFromRequest(modelId, tenantId);
 
         if (modelRequest.isCategoryChanged()) {
             model.setCategory(modelRequest.getCategory());
@@ -93,8 +94,8 @@ public class ModelResource extends BaseModelResource {
             @ApiResponse(code = 404, message = "Indicates the requested model was not found.")
     })
     @DeleteMapping("/repository/models/{modelId}")
-    public void deleteModel(@ApiParam(name = "modelId") @PathVariable String modelId, HttpServletResponse response) {
-        Model model = getModelFromRequest(modelId);
+    public void deleteModel(@ApiParam(name = "modelId") @PathVariable String modelId, @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletResponse response) {
+        Model model = getModelFromRequest(modelId, tenantId);
         repositoryService.deleteModel(model.getId());
         response.setStatus(HttpStatus.NO_CONTENT.value());
     }

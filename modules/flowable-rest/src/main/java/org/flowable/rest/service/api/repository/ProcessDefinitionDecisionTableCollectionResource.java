@@ -20,6 +20,7 @@ import org.flowable.dmn.api.DmnDecisionTable;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
@@ -42,11 +43,8 @@ public class ProcessDefinitionDecisionTableCollectionResource extends BaseProces
             @ApiResponse(code = 404, message = "Indicates the requested process definition was not found.")
     })
     @GetMapping(value = "/repository/process-definitions/{processDefinitionId}/decision-tables", produces = "application/json")
-    public List<DecisionTableResponse> getDecisionTablesForProcessDefinition(
-            @ApiParam(name = "processDefinitionId") @PathVariable String processDefinitionId,
-            HttpServletRequest request) {
-
-        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId);
+    public List<DecisionTableResponse> getDecisionTablesForProcessDefinition( @ApiParam(name = "processDefinitionId") @PathVariable String processDefinitionId, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
+        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId, tenantId);
         
         List<DmnDecisionTable> decisionTables = repositoryService.getDecisionTablesForProcessDefinition(processDefinition.getId());
 

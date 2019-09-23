@@ -54,11 +54,16 @@ import org.flowable.ui.admin.domain.ServerConfig;
 import org.flowable.ui.admin.service.AttachmentResponseInfo;
 import org.flowable.ui.admin.service.ResponseInfo;
 import org.flowable.ui.admin.service.engine.exception.FlowableServiceException;
+import org.flowable.ui.common.security.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Service for invoking Flowable REST services.
@@ -78,6 +83,9 @@ public class FlowableClientService {
 
     @Autowired
     protected ObjectMapper objectMapper;
+    
+    @Value("${flowable.admin.app.security.tenant-filtering:false}")
+    boolean enableTenantFiltering;
 
     @Value("${flowable.admin.app.security.preemptive-basic-authentication:false}")
     boolean preemptiveBasicAuthentication;
@@ -142,7 +150,14 @@ public class FlowableClientService {
      * {@link FlowableServiceException} is thrown with the error message received from the client, if possible.
      */
     public JsonNode executeRequest(HttpUriRequest request, String userName, String password, int expectedStatusCode) {
+        if (enableTenantFiltering) {
+            final String tenantId = SecurityUtils.getCurrentUserObject().getTenantId();
 
+            if (tenantId != null) {
+                request.addHeader("x-tenant", tenantId);
+            }
+        }
+        
         FlowableServiceException exception = null;
         CloseableHttpClient client = getHttpClient(userName, password);
         try {
@@ -590,6 +605,13 @@ public class FlowableClientService {
         }
 
         URIBuilder builder = createUriBuilder(finalUrl + uri);
+        
+        if (enableTenantFiltering) {
+            final String tenantId = SecurityUtils.getCurrentUserObject().getTenantId();
+            if (tenantId != null) {
+                builder.setParameter("tenantId", tenantId);
+            }
+        }
 
         return builder.toString();
     }

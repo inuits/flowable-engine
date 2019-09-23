@@ -208,7 +208,18 @@ public class HistoricProcessInstanceBaseResource {
     }
     
     protected HistoricProcessInstance getHistoricProcessInstanceFromRequest(String processInstanceId) {
-        HistoricProcessInstance processInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
+        return getHistoricProcessInstanceFromRequest(processInstanceId, null);
+    }
+    
+    protected HistoricProcessInstance getHistoricProcessInstanceFromRequest(String processInstanceId, String tenantId) {
+        final HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery();
+        
+        if (tenantId != null) {
+            historicProcessInstanceQuery.processInstanceTenantId(tenantId);
+        }
+        
+        HistoricProcessInstance processInstance = historicProcessInstanceQuery.processInstanceId(processInstanceId).singleResult();
+        
         if (processInstance == null) {
             throw new FlowableObjectNotFoundException("Could not find a process instance with id '" + processInstanceId + "'.", HistoricProcessInstance.class);
         }
