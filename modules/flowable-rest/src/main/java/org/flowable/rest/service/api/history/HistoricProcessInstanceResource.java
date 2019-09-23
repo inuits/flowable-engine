@@ -13,7 +13,6 @@
 
 package org.flowable.rest.service.api.history;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.flowable.engine.HistoryService;
@@ -25,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
@@ -52,8 +52,8 @@ public class HistoricProcessInstanceResource extends HistoricProcessInstanceBase
             @ApiResponse(code = 200, message = "Indicates that the historic process instances could be found."),
             @ApiResponse(code = 404, message = "Indicates that the historic process instances could not be found.") })
     @GetMapping(value = "/history/historic-process-instances/{processInstanceId}", produces = "application/json")
-    public HistoricProcessInstanceResponse getProcessInstance(@ApiParam(name = "processInstanceId") @PathVariable String processInstanceId, HttpServletRequest request) {
-        HistoricProcessInstanceResponse processInstanceResponse = restResponseFactory.createHistoricProcessInstanceResponse(getHistoricProcessInstanceFromRequest(processInstanceId));
+    public HistoricProcessInstanceResponse getProcessInstance(@ApiParam(name = "processInstanceId") @PathVariable String processInstanceId, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
+        HistoricProcessInstanceResponse processInstanceResponse = restResponseFactory.createHistoricProcessInstanceResponse(getHistoricProcessInstanceFromRequest(processInstanceId, tenantId));
         
         ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(processInstanceResponse.getProcessDefinitionId()).singleResult();
         
@@ -70,8 +70,8 @@ public class HistoricProcessInstanceResource extends HistoricProcessInstanceBase
             @ApiResponse(code = 204, message = "Indicates that the historic process instance was deleted."),
             @ApiResponse(code = 404, message = "Indicates that the historic process instance could not be found.") })
     @DeleteMapping(value = "/history/historic-process-instances/{processInstanceId}")
-    public void deleteProcessInstance(@ApiParam(name = "processInstanceId") @PathVariable String processInstanceId, HttpServletResponse response) {
-        HistoricProcessInstance processInstance = getHistoricProcessInstanceFromRequest(processInstanceId);
+    public void deleteProcessInstance(@ApiParam(name = "processInstanceId") @PathVariable String processInstanceId, HttpServletResponse response, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
+        HistoricProcessInstance processInstance = getHistoricProcessInstanceFromRequest(processInstanceId, tenantId);
         
         if (restApiInterceptor != null) {
             restApiInterceptor.deleteHistoricProcess(processInstance);

@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
@@ -49,8 +50,8 @@ public class ProcessDefinitionIdentityLinkCollectionResource extends BaseProcess
             @ApiResponse(code = 404, message = "Indicates the requested process definition was not found.")
     })
     @GetMapping(value = "/repository/process-definitions/{processDefinitionId}/identitylinks", produces = "application/json")
-    public List<RestIdentityLink> getIdentityLinks(@ApiParam(name = "processDefinitionId") @PathVariable String processDefinitionId, HttpServletRequest request) {
-        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId);
+    public List<RestIdentityLink> getIdentityLinks(@ApiParam(name = "processDefinitionId") @PathVariable String processDefinitionId, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
+        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId, tenantId);
         return restResponseFactory.createRestIdentityLinks(repositoryService.getIdentityLinksForProcessDefinition(processDefinition.getId()));
     }
 
@@ -62,9 +63,9 @@ public class ProcessDefinitionIdentityLinkCollectionResource extends BaseProcess
             @ApiResponse(code = 404, message = "Indicates the requested process definition was not found.")
     })
     @PostMapping(value = "/repository/process-definitions/{processDefinitionId}/identitylinks", produces = "application/json")
-    public RestIdentityLink createIdentityLink(@ApiParam(name = "processDefinitionId") @PathVariable String processDefinitionId, @RequestBody RestIdentityLink identityLink, HttpServletRequest request, HttpServletResponse response) {
+    public RestIdentityLink createIdentityLink(@ApiParam(name = "processDefinitionId") @PathVariable String processDefinitionId, @RequestBody RestIdentityLink identityLink, @RequestHeader(required = false, value = "x-tenant") String tenantId, HttpServletResponse response) {
 
-        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId);
+        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId, tenantId);
 
         if (identityLink.getGroup() == null && identityLink.getUser() == null) {
             throw new FlowableIllegalArgumentException("A group or a user is required to create an identity link.");

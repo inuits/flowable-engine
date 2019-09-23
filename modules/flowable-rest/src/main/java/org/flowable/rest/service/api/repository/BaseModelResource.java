@@ -16,6 +16,7 @@ package org.flowable.rest.service.api.repository;
 import org.flowable.common.engine.api.FlowableObjectNotFoundException;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.repository.Model;
+import org.flowable.engine.repository.ModelQuery;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.rest.service.api.BpmnRestApiInterceptor;
 import org.flowable.rest.service.api.RestResponseFactory;
@@ -32,14 +33,24 @@ public class BaseModelResource {
     @Autowired
     protected RepositoryService repositoryService;
     
-    @Autowired(required=false)
+    @Autowired(required = false)
     protected BpmnRestApiInterceptor restApiInterceptor;
 
     /**
      * Returns the {@link Model} that is requested. Throws the right exceptions when bad request was made or model was not found.
      */
     protected Model getModelFromRequest(String modelId) {
-        Model model = repositoryService.createModelQuery().modelId(modelId).singleResult();
+        return getModelFromRequest(modelId, null);
+    }
+
+    protected Model getModelFromRequest(String modelId, String tenantId) {
+        ModelQuery modelQuery = repositoryService.createModelQuery().modelId(modelId);
+
+        if (tenantId != null) {
+            modelQuery.modelTenantId(tenantId);
+        }
+
+        Model model = modelQuery.singleResult();
 
         if (model == null) {
             throw new FlowableObjectNotFoundException("Could not find a model with id '" + modelId + "'.", ProcessDefinition.class);

@@ -15,7 +15,11 @@ package org.flowable.rest.service.api.management;
 
 import org.flowable.common.engine.api.FlowableObjectNotFoundException;
 import org.flowable.engine.ManagementService;
+import org.flowable.job.api.DeadLetterJobQuery;
 import org.flowable.job.api.Job;
+import org.flowable.job.api.JobQuery;
+import org.flowable.job.api.SuspendedJobQuery;
+import org.flowable.job.api.TimerJobQuery;
 import org.flowable.rest.service.api.BpmnRestApiInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -33,25 +37,57 @@ public class JobBaseResource {
     protected BpmnRestApiInterceptor restApiInterceptor;
 
     protected Job getJobById(String jobId) {
-        Job job = managementService.createJobQuery().jobId(jobId).singleResult();
+        return getJobById(jobId, null);
+    }
+    
+    protected Job getJobById(String jobId, String tenantId) {
+        final JobQuery jobQuery = managementService.createJobQuery();
+        if (tenantId != null) {
+            jobQuery.jobTenantId(tenantId);
+        }
+        Job job = jobQuery.jobId(jobId).singleResult();
         validateJob(job, jobId);
         return job;
     }
     
     protected Job getTimerJobById(String jobId) {
-        Job job = managementService.createTimerJobQuery().jobId(jobId).singleResult();
+        return getTimerJobById(jobId, null);
+    }
+    
+    protected Job getTimerJobById(String jobId, String tenantId) {
+        final TimerJobQuery timerJobQuery = managementService.createTimerJobQuery();
+        if (tenantId != null) {
+            timerJobQuery.jobTenantId(tenantId);
+        }
+        Job job = timerJobQuery.jobId(jobId).singleResult();
         validateJob(job, jobId);
         return job;
     }
     
     protected Job getSuspendedJobById(String jobId) {
-        Job job = managementService.createSuspendedJobQuery().jobId(jobId).singleResult();
+        return getSuspendedJobById(jobId, null);
+    }
+    
+    protected Job getSuspendedJobById(String jobId, String tenantId) {
+        final SuspendedJobQuery suspendedJobQuery = managementService.createSuspendedJobQuery();
+        if (tenantId != null) {
+            suspendedJobQuery.jobTenantId(tenantId);
+        }
+        Job job = suspendedJobQuery.jobId(jobId).singleResult();
         validateJob(job, jobId);
         return job;
     }
 
     protected Job getDeadLetterJobById(String jobId) {
-        Job job = managementService.createDeadLetterJobQuery().jobId(jobId).singleResult();
+        return getDeadLetterJobById(jobId, null);
+    }
+    
+    protected Job getDeadLetterJobById(String jobId, String tenantId) {
+        final DeadLetterJobQuery deadLetterJobQuery = managementService.createDeadLetterJobQuery();
+        if (tenantId != null) {
+            deadLetterJobQuery.jobTenantId(tenantId);
+        }
+        Job job = deadLetterJobQuery.jobId(jobId).singleResult();
         validateJob(job, jobId);
         return job;
     }

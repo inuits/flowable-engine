@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
@@ -76,8 +77,8 @@ public class ProcessDefinitionResource extends BaseProcessDefinitionResource {
             @ApiResponse(code = 404, message = "Indicates the requested process definition was not found.")
     })
     @GetMapping(value = "/repository/process-definitions/{processDefinitionId}", produces = "application/json")
-    public ProcessDefinitionResponse getProcessDefinition(@ApiParam(name = "processDefinitionId") @PathVariable String processDefinitionId, HttpServletRequest request) {
-        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId);
+    public ProcessDefinitionResponse getProcessDefinition(@ApiParam(name = "processDefinitionId") @PathVariable String processDefinitionId, @RequestHeader(required = false, value = "x-tenant") String tenantId) {
+        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId, tenantId);
 
         return restResponseFactory.createProcessDefinitionResponse(processDefinition);
     }
@@ -95,13 +96,14 @@ public class ProcessDefinitionResource extends BaseProcessDefinitionResource {
     public ProcessDefinitionResponse executeProcessDefinitionAction(
             @ApiParam(name = "processDefinitionId") @PathVariable String processDefinitionId,
             @ApiParam(required = true) @RequestBody ProcessDefinitionActionRequest actionRequest,
+            @RequestHeader(required = false, value = "x-tenant") String tenantId,
             HttpServletRequest request) {
 
         if (actionRequest == null) {
             throw new FlowableIllegalArgumentException("No action found in request body.");
         }
 
-        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId);
+        ProcessDefinition processDefinition = getProcessDefinitionFromRequest(processDefinitionId, tenantId);
 
         if (actionRequest.getCategory() != null) {
             // Update of category required

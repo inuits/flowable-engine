@@ -23,7 +23,9 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URIBuilder;
 import org.flowable.ui.admin.domain.ServerConfig;
 import org.flowable.ui.admin.service.engine.exception.FlowableServiceException;
+import org.flowable.ui.common.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -54,12 +56,26 @@ public class TaskService {
 
     @Autowired
     protected ObjectMapper objectMapper;
+    
+    @Value("${flowable.admin.app.security.tenant-filtering:false}")
+    boolean enableTenantFiltering;
 
     public JsonNode listTasks(ServerConfig serverConfig, ObjectNode bodyNode) {
+
+        if( SecurityUtils.getCurrentTenantId() != null ){
+            bodyNode.put("tenantIdLike", SecurityUtils.getCurrentTenantId());
+        }
 
         JsonNode resultNode = null;
         try {
             URIBuilder builder = clientUtil.createUriBuilder(HISTORIC_TASK_QUERY_URL);
+            
+            if (enableTenantFiltering) {
+                final String tenantId = SecurityUtils.getCurrentUserObject().getTenantId();
+                if (tenantId != null) {
+                    bodyNode.put("tenantId", tenantId);
+                }
+            }
 
             String uri = clientUtil.getUriWithPagingAndOrderParameters(builder, bodyNode);
             HttpPost post = clientUtil.createPost(uri, serverConfig);

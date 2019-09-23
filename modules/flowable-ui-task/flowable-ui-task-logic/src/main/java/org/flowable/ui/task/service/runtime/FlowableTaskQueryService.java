@@ -124,6 +124,10 @@ public class FlowableTaskQueryService {
             taskInfoQueryWrapper = new TaskInfoQueryWrapper(taskService.createTaskQuery());
         }
 
+        if ( currentUser.getTenantId() != null ) {
+            taskInfoQueryWrapper.getTaskInfoQuery().taskTenantId(currentUser.getTenantId());
+        }
+
         JsonNode appDefinitionKeyNode = requestNode.get("appDefinitionKey");
         if (appDefinitionKeyNode != null && !appDefinitionKeyNode.isNull()) {
             List<AppDefinition> appDefinitions = appRepositoryService.createAppDefinitionQuery().appDefinitionKey(appDefinitionKeyNode.asText()).list();
