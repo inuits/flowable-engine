@@ -380,7 +380,7 @@ class CompositeHistoryManagerTest {
     @Test
     void recordFormPropertiesSubmitted() {
         ExecutionEntity processInstance = new ExecutionEntityImpl();
-        Map<String, String> properties = new HashMap<>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("key", "value");
         Date createTime = Date.from(Instant.now().plusSeconds(3));
         compositeHistoryManager.recordFormPropertiesSubmitted(processInstance, properties, "task-1", createTime);

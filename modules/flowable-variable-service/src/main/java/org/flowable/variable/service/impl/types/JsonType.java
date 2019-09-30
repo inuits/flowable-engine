@@ -24,6 +24,8 @@ import org.flowable.variable.service.impl.persistence.entity.VariableInstanceEnt
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.LinkedHashMap;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -109,7 +111,7 @@ public class JsonType implements VariableType, MutableVariableType<JsonNode, Jso
             valueFields.setCachedValue(null);
         } else {
             JsonNode jsonNode = (JsonNode) value;
-            String textValue = value.toString();
+            String textValue = objectMapper.valueToTree(value).toString();
             if (textValue.length() <= maxLength) {
                 valueFields.setTextValue(textValue);
             } else {
@@ -153,7 +155,7 @@ public class JsonType implements VariableType, MutableVariableType<JsonNode, Jso
 
     @Override
     public boolean isAbleToStore(Object value) {
-        if (value == null) {
+        if (value == null || value instanceof LinkedHashMap) {
             return true;
         }
         return value instanceof JsonNode;

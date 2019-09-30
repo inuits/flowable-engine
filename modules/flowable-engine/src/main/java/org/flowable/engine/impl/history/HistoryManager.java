@@ -184,7 +184,7 @@ public interface HistoryManager {
     /**
      * Report form properties submitted, if audit history is enabled.
      */
-    void recordFormPropertiesSubmitted(ExecutionEntity processInstance, Map<String, String> properties, String taskId, Date createTime);
+    void recordFormPropertiesSubmitted(ExecutionEntity processInstance, Map<String, Object> properties, String taskId, Date createTime);
 
     /**
      * Record the creation of a new {@link IdentityLink}, if audit history is enabled.
