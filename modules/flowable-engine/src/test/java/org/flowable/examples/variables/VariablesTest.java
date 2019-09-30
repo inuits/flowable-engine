@@ -1771,7 +1771,7 @@ public class VariablesTest extends PluggableFlowableTestCase {
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("taskAssigneeProcess");
         org.flowable.task.api.Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
 
-        Map<String, String> variables = new HashMap<>();
+        Map<String, Object> variables = new HashMap<>();
         variables.put("testProperty", "434");
 
         formService.submitTaskFormData(task.getId(), variables);
@@ -1801,11 +1801,11 @@ public class VariablesTest extends PluggableFlowableTestCase {
         variables = new HashMap<>();
         variables.put("testProperty", null);
 
-        try {
+//        try {
             formService.submitTaskFormData(task.getId(), variables);
-        } catch (Exception e) {
-            fail("Should not throw exception as the testProperty is defined, although null");
-        }
+//        } catch (Exception e) {
+//            fail("Should not throw exception as the testProperty is defined, although null");
+//        }
         resultVar = (String) runtimeService.getVariable(processInstance.getId(), "testProperty");
 
         assertNull(resultVar);

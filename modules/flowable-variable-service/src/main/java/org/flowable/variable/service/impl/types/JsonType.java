@@ -17,6 +17,8 @@ import org.flowable.variable.api.types.VariableType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.LinkedHashMap;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -62,18 +64,20 @@ public class JsonType implements VariableType {
 
     @Override
     public void setValue(Object value, ValueFields valueFields) {
-        valueFields.setTextValue(value != null ? value.toString() : null);
+        valueFields.setTextValue(value != null ? objectMapper.valueToTree(value).toString() : null);
     }
 
     @Override
     public boolean isAbleToStore(Object value) {
-        if (value == null) {
+        if (value == null || value instanceof LinkedHashMap) {
             return true;
         }
+
         if (JsonNode.class.isAssignableFrom(value.getClass())) {
             JsonNode jsonValue = (JsonNode) value;
             return jsonValue.toString().length() <= maxLength;
         }
+
         return false;
     }
 }

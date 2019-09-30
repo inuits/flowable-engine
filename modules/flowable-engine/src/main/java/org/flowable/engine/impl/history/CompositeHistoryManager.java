@@ -266,7 +266,7 @@ public class CompositeHistoryManager implements HistoryManager {
     }
 
     @Override
-    public void recordFormPropertiesSubmitted(ExecutionEntity processInstance, Map<String, String> properties, String taskId, Date createTime) {
+    public void recordFormPropertiesSubmitted(ExecutionEntity processInstance, Map<String, Object> properties, String taskId, Date createTime) {
         for (HistoryManager historyManager : historyManagers) {
             historyManager.recordFormPropertiesSubmitted(processInstance, properties, taskId, createTime);
         }
