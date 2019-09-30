@@ -38,6 +38,19 @@ public class SecurityUtils {
         return null;
     }
 
+
+    /**
+     * Get the tenant id of the current user.
+     */
+    public static String getCurrentTenantId() {
+        User user = getCurrentUserObject();
+        if (user != null) {
+            return user.getTenantId();
+        }
+        return null;
+    }
+
+
     /**
      * @return the {@link User} object associated with the current logged in user.
      */
