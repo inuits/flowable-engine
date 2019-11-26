@@ -12,18 +12,7 @@
  */
 package org.flowable.ui.idm.rest.app;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.google.common.net.HttpHeaders;
 import org.flowable.idm.api.Privilege;
 import org.flowable.idm.api.User;
 import org.flowable.ui.common.service.exception.NotFoundException;
@@ -35,6 +24,7 @@ import org.flowable.ui.idm.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.web.authentication.RememberMeServices;
@@ -44,7 +34,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.net.HttpHeaders;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * @author Matthias De Bie
@@ -54,6 +53,7 @@ import com.google.common.net.HttpHeaders;
  */
 @RestController
 @RequestMapping("/app")
+@ConditionalOnBean(SSOHandler.class)
 public class IdmSSOResource {
 
     @Autowired

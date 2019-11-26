@@ -1,16 +1,12 @@
 package org.flowable.ui.idm.application;
 
-import java.util.AbstractMap;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.flowable.ui.idm.model.SSOUserInfo;
 import org.flowable.ui.idm.rest.app.SSOHandler;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,11 +14,15 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
-@Component
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.AbstractMap;
+
+@Component("ssoHandler")
+@ConditionalOnProperty("flowable.sso.digipolis.enabled")
 public class DigipolisSSOHandler implements SSOHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(DigipolisSSOHandler.class);

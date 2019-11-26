@@ -34,7 +34,7 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
-        
+
 		<!-- JSON -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
@@ -70,7 +70,7 @@
         </dependency>
 
 	</dependencies>
-	
+
 	<profiles>
 		<profile>
 			<id>distro</id>
