@@ -1,13 +1,5 @@
 package org.flowable.ui.idm.application;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.flowable.ui.idm.model.SSOUserInfo;
 import org.flowable.ui.idm.rest.app.SSOHandler;
 import org.json.JSONObject;
@@ -15,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +17,15 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-@Component
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Component("ssoHandler")
+@ConditionalOnProperty("flowable.sso.keycloak.enabled")
 public class KeyCloakSSOHandler implements SSOHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(KeyCloakSSOHandler.class);
