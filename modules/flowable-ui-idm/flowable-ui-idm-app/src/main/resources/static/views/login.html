@@ -24,6 +24,9 @@
                     <p translate="LOGIN.INVALID-CREDENTIALS"></p>
                 </div>
             </form>
+            <div ng-if="hasExternalAuth">
+                <a href="{{ ssoUrl }}">Log in with external service</a>
+            </div>
         </div>
     </div>
 </div>
