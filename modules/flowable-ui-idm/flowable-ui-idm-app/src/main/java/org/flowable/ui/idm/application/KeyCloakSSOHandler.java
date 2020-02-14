@@ -24,7 +24,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-@Component
+@Component("ssoHandler")
+@ConditionalOnProperty("flowable.sso.keycloak.enabled")
 public class KeyCloakSSOHandler implements SSOHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(KeyCloakSSOHandler.class);

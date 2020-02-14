@@ -54,6 +54,7 @@ import com.google.common.net.HttpHeaders;
  */
 @RestController
 @RequestMapping("/app")
+@ConditionalOnBean(SSOHandler.class)
 public class IdmSSOResource {
 
     @Autowired
