@@ -5,7 +5,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.flowable.ui.idm.model.SSOUserInfo;
 import org.springframework.util.MultiValueMap;
+import org.springframework.stereotype.Component;
 
+@Component
 public class EmptySSOHandler implements SSOHandler {
 
     @Override
