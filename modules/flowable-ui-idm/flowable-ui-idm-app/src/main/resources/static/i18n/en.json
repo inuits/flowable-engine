@@ -84,7 +84,8 @@
             "PROFILE": "Personal",
             "USER-MGMT": "Users",
             "GROUP-MGMT": "Groups",
-            "PRIVILEGE-MGMT": "Privileges"
+            "PRIVILEGE-MGMT": "Privileges",
+            "TENANT-MGMT": "Tenants"
         },
         "ACTION": {
           "CANCEL": "Cancel",
@@ -257,6 +258,19 @@
             "CHANGE-PASSWORD-NOT-MATCHING": "Passwords don't match",
             "CHANGE-PASSWORD-INVALID": "Invalid password"
          }
+      },
+      "TENANT-MGMT": {
+        "TITLE": "Tenants",
+        "CREATE-TENANT": "Create tenant",
+        "NAME": "Name",
+        "ID": "ID",
+        "POPUP": {
+          "CREATE-TITLE": "Create tenant",
+          "CREATE-ID": "Tenant id",
+          "CREATE-NAME": "Name",
+          "DELETE-TITLE": "Delete tenant",
+          "EDIT-TITLE": "Edit tenant"
+        }
       },
       "USERS": {
         "TITLE": "User administration",

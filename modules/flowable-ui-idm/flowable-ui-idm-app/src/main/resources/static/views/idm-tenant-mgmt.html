@@ -1,0 +1,50 @@
+
+<div class="main-list" id="main-list">
+    <div class="list-subheader clearfix" style="margin-top: 0px">
+        <div class="btn-group pull-right">
+            <button class="btn" translate="IDM.TENANT-MGMT.CREATE-TENANT" ng-click="showCreateTenantPopup()">&nbsp;</button>
+        </div>
+    </div>
+    <div class="list-wrapper" auto-height>
+
+        <span loading="model.loading" ng-show="model.loading"></span>
+
+        <div class="list-wrapper" ng-show="!model.loading">
+
+        </div>
+    </div>
+</div>
+
+<div class="main-content-wrapper">
+
+    <div class="main-content">
+
+        <div class="header">
+            <div>
+                <h2>{{'IDM.TENANT-MGMT.TITLE' | translate}}</h2>
+            </div>
+        </div>
+
+        <div class="content" auto-height offset="6">
+            <div style="margin-top: 10px;">
+            </div>
+            <div class="message clearfix">
+                <div>
+                    <table width="100%" class="users">
+                        <tr>
+                            <th width="4%"></th>
+                            <th width="50%">{{'IDM.TENANT-MGMT.NAME' | translate}}</th>
+                            <th width="50%">{{'IDM.TENANT-MGMT.ID' | translate}}</th>
+                        </tr>
+                        <tr ng-repeat="tenant in model.tenants.data">
+                            <td class="control"><input type="checkbox" ng-checked="model.selectedUsers[user.id]"></td>
+                            <td>{{tenant.name}}</td>
+                            <td>{{tenant.id}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
