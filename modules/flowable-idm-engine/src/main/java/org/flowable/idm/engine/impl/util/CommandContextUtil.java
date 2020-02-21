@@ -19,6 +19,7 @@ import org.flowable.common.engine.impl.interceptor.EngineConfigurationConstants;
 import org.flowable.idm.engine.IdmEngineConfiguration;
 import org.flowable.idm.engine.impl.persistence.entity.ByteArrayEntityManager;
 import org.flowable.idm.engine.impl.persistence.entity.GroupEntityManager;
+import org.flowable.idm.engine.impl.persistence.entity.TenantEntityManager;
 import org.flowable.idm.engine.impl.persistence.entity.IdentityInfoEntityManager;
 import org.flowable.idm.engine.impl.persistence.entity.MembershipEntityManager;
 import org.flowable.idm.engine.impl.persistence.entity.PrivilegeEntityManager;
@@ -127,6 +128,14 @@ public class CommandContextUtil {
     
     public static IdentityInfoEntityManager getIdentityInfoEntityManager(CommandContext commandContext) {
         return getIdmEngineConfiguration(commandContext).getIdentityInfoEntityManager();
+    }
+
+    public static TenantEntityManager getTenantEntityManager() {
+        return getTenantEntityManager(getCommandContext());
+    }
+    
+    public static TenantEntityManager getTenantEntityManager(CommandContext commandContext) {
+        return getIdmEngineConfiguration(commandContext).getTenantEntityManager();
     }
     
     public static CommandContext getCommandContext() {

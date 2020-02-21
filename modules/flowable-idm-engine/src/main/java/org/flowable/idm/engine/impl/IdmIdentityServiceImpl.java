@@ -18,6 +18,8 @@ import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.common.engine.impl.service.CommonEngineServiceImpl;
 import org.flowable.idm.api.Group;
 import org.flowable.idm.api.GroupQuery;
+import org.flowable.idm.api.Tenant;
+import org.flowable.idm.api.TenantQuery;
 import org.flowable.idm.api.IdmIdentityService;
 import org.flowable.idm.api.NativeGroupQuery;
 import org.flowable.idm.api.NativeTokenQuery;
@@ -61,6 +63,10 @@ import org.flowable.idm.engine.impl.cmd.SaveUserCmd;
 import org.flowable.idm.engine.impl.cmd.SetUserInfoCmd;
 import org.flowable.idm.engine.impl.cmd.SetUserPictureCmd;
 import org.flowable.idm.engine.impl.cmd.UpdateUserPasswordCmd;
+import org.flowable.idm.engine.impl.cmd.CreateTenantCmd;
+import org.flowable.idm.engine.impl.cmd.SaveTenantCmd;
+import org.flowable.idm.engine.impl.cmd.DeleteTenantCmd;
+import org.flowable.idm.engine.impl.cmd.CreateTenantQueryCmd;
 import org.flowable.idm.engine.impl.persistence.entity.IdentityInfoEntity;
 
 /**
@@ -247,4 +253,26 @@ public class IdmIdentityServiceImpl extends CommonEngineServiceImpl<IdmEngineCon
     public List<User> getUsersWithPrivilege(String name) {
         return commandExecutor.execute(new GetUsersWithPrivilegeCmd(name));
     }
+
+    @Override
+    public Tenant newTenant(String tenantId) {
+        return commandExecutor.execute(new CreateTenantCmd(tenantId));
+    }
+
+    @Override
+    public void saveTenant(Tenant tenant) {
+        commandExecutor.execute(new SaveTenantCmd(tenant));
+    }
+
+    @Override
+    public void deleteTenant(String tenantId) {
+        commandExecutor.execute(new DeleteTenantCmd(tenantId));
+    }
+
+    @Override
+    public TenantQuery createTenantQuery() {
+        return commandExecutor.execute(new CreateTenantQueryCmd());
+    }
+
+
 }

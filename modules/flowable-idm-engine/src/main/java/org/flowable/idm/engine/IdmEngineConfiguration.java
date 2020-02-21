@@ -65,6 +65,8 @@ import org.flowable.idm.engine.impl.persistence.entity.PropertyEntityManager;
 import org.flowable.idm.engine.impl.persistence.entity.PropertyEntityManagerImpl;
 import org.flowable.idm.engine.impl.persistence.entity.TableDataManager;
 import org.flowable.idm.engine.impl.persistence.entity.TableDataManagerImpl;
+import org.flowable.idm.engine.impl.persistence.entity.TenantEntityManager;
+import org.flowable.idm.engine.impl.persistence.entity.TenantEntityManagerImpl;
 import org.flowable.idm.engine.impl.persistence.entity.TokenEntityManager;
 import org.flowable.idm.engine.impl.persistence.entity.TokenEntityManagerImpl;
 import org.flowable.idm.engine.impl.persistence.entity.UserEntityManager;
@@ -76,6 +78,7 @@ import org.flowable.idm.engine.impl.persistence.entity.data.MembershipDataManage
 import org.flowable.idm.engine.impl.persistence.entity.data.PrivilegeDataManager;
 import org.flowable.idm.engine.impl.persistence.entity.data.PrivilegeMappingDataManager;
 import org.flowable.idm.engine.impl.persistence.entity.data.PropertyDataManager;
+import org.flowable.idm.engine.impl.persistence.entity.data.TenantDataManager;
 import org.flowable.idm.engine.impl.persistence.entity.data.TokenDataManager;
 import org.flowable.idm.engine.impl.persistence.entity.data.UserDataManager;
 import org.flowable.idm.engine.impl.persistence.entity.data.impl.MybatisByteArrayDataManager;
@@ -85,6 +88,7 @@ import org.flowable.idm.engine.impl.persistence.entity.data.impl.MybatisMembersh
 import org.flowable.idm.engine.impl.persistence.entity.data.impl.MybatisPrivilegeDataManager;
 import org.flowable.idm.engine.impl.persistence.entity.data.impl.MybatisPrivilegeMappingDataManager;
 import org.flowable.idm.engine.impl.persistence.entity.data.impl.MybatisPropertyDataManager;
+import org.flowable.idm.engine.impl.persistence.entity.data.impl.MybatisTenantDataManager;
 import org.flowable.idm.engine.impl.persistence.entity.data.impl.MybatisTokenDataManager;
 import org.flowable.idm.engine.impl.persistence.entity.data.impl.MybatisUserDataManager;
 
@@ -107,6 +111,7 @@ public class IdmEngineConfiguration extends AbstractEngineConfiguration implemen
     protected IdentityInfoDataManager identityInfoDataManager;
     protected MembershipDataManager membershipDataManager;
     protected PropertyDataManager idmPropertyDataManager;
+    protected TenantDataManager tenantDataManager;
     protected TokenDataManager tokenDataManager;
     protected UserDataManager userDataManager;
     protected PrivilegeDataManager privilegeDataManager;
@@ -119,6 +124,7 @@ public class IdmEngineConfiguration extends AbstractEngineConfiguration implemen
     protected MembershipEntityManager membershipEntityManager;
     protected PropertyEntityManager idmPropertyEntityManager;
     protected TableDataManager tableDataManager;
+    protected TenantEntityManager tenantEntityManager;
     protected TokenEntityManager tokenEntityManager;
     protected UserEntityManager userEntityManager;
     protected PrivilegeEntityManager privilegeEntityManager;
@@ -246,6 +252,9 @@ public class IdmEngineConfiguration extends AbstractEngineConfiguration implemen
         if (idmPropertyDataManager == null) {
             idmPropertyDataManager = new MybatisPropertyDataManager(this);
         }
+        if (tenantDataManager == null) {
+            tenantDataManager = new MybatisTenantDataManager(this);
+        }
         if (tokenDataManager == null) {
             tokenDataManager = new MybatisTokenDataManager(this);
         }
@@ -280,6 +289,9 @@ public class IdmEngineConfiguration extends AbstractEngineConfiguration implemen
         }
         if (tableDataManager == null) {
             tableDataManager = new TableDataManagerImpl(this);
+        }
+        if (tenantEntityManager == null) {
+            tenantEntityManager = new TenantEntityManagerImpl(this, tenantDataManager);
         }
         if (tokenEntityManager == null) {
             tokenEntityManager = new TokenEntityManagerImpl(this, tokenDataManager);
@@ -584,6 +596,15 @@ public class IdmEngineConfiguration extends AbstractEngineConfiguration implemen
         return this;
     }
 
+    public TenantDataManager getTenantDataManager() {
+        return tenantDataManager;
+    }
+
+    public IdmEngineConfiguration setTenantDataManager(TenantDataManager tenantDataManager) {
+        this.tenantDataManager = tenantDataManager;
+        return this;
+    }
+
     public TokenDataManager getTokenDataManager() {
         return tokenDataManager;
     }
@@ -662,6 +683,15 @@ public class IdmEngineConfiguration extends AbstractEngineConfiguration implemen
 
     public IdmEngineConfiguration setIdmPropertyEntityManager(PropertyEntityManager idmPropertyEntityManager) {
         this.idmPropertyEntityManager = idmPropertyEntityManager;
+        return this;
+    }
+
+    public TenantEntityManager getTenantEntityManager() {
+        return tenantEntityManager;
+    }
+
+    public IdmEngineConfiguration setTenantEntityManager(TenantEntityManager tenantEntityManager) {
+        this.tenantEntityManager = tenantEntityManager;
         return this;
     }
 

@@ -174,7 +174,8 @@
              "BULK-UPDATE-PASSWORD-TITLE": "Change password",
              "BULK-UPDATE-PASSWORD": "Password",
              "BULK-UPDATE-PASSWORD-REPEAT": "Repeat password",
-             "BULK-UPDATE-PASSWORD-CONFIRM": "Change"
+             "BULK-UPDATE-PASSWORD-CONFIRM": "Change",
+             "PLACEHOLDER-TENANT": "Choose between the following tenants"
          }
       },
       "FUNCTIONAL-GROUP-MGMT": {
@@ -264,6 +265,9 @@
         "CREATE-TENANT": "Create tenant",
         "NAME": "Name",
         "ID": "ID",
+        "ACTIONS": "Select an action",
+        "EDIT-TENANT": "Change details",
+        "DELETE-TENANT": "Delete",
         "POPUP": {
           "CREATE-TITLE": "Create tenant",
           "CREATE-ID": "Tenant id",

@@ -222,10 +222,13 @@ flowableApp.controller('IdmUserMgmtController', ['$rootScope', '$scope', '$trans
 flowableApp.controller('IdmCreateUserPopupController', ['$rootScope', '$scope', '$http',
     function ($rootScope, $scope, $http) {
 
+        $scope.tenantOptions = [{"value":"TEN","label":"Ten"},{"value":"ANT","label":"Ant"},{"value":"ALL","label":"All"}];
 
         if ($scope.model.user === null || $scope.model.user === undefined) {
             $scope.model.user = {};
         }
+
+        $scope.model.user.tenantId = [];
 
         $scope.createNewUser = function () {
             if (!$scope.model.user.id) {

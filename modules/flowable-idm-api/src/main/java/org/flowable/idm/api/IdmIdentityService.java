@@ -256,4 +256,35 @@ public interface IdmIdentityService {
      */
     PrivilegeQuery createPrivilegeQuery();
 
+    /**
+     * Creates a {@link TenantQuery} that allows to programmatically query the tenants.
+     */
+    TenantQuery createTenantQuery();
+
+    /**
+     * Saves the tenant. If the tenant already existed, the tenant is updated.
+     * 
+     * @param tenant
+     *            tenant to save. Cannot be null.
+     * @throws RuntimeException
+     *             when a tenant with the same name already exists.
+     */
+    void saveTenant(Tenant tenant);
+
+    /**
+     * Deletes the tenant. When no tenant exists with the given id, this operation is ignored.
+     * 
+     * @param tenantId
+     *            id of the tenant that should be deleted, cannot be null.
+     */
+    void deleteTenant(String tenantId);
+
+    /**
+     * Creates a new tenant. The tenant is transient and must be saved using {@link #saveTenant(Tenant)}.
+     * 
+     * @param tenantId
+     *            id for the new tenant, cannot be null.
+     */
+    Tenant newTenant(String tenantId);
+
 }

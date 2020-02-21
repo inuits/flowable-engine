@@ -20,6 +20,19 @@
     <div class="main-content">
 
         <div class="header">
+            <div class="pull-right">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default" ng-disabled="model.selectedTenantCount == 0">{{'IDM.TENANT-MGMT.ACTIONS' | translate}}</button>
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-disabled="model.selectedTenantCount == 0">
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li ng-click="editTenantDetails()" ng-if="model.selectedTenantCount == 1"><a href="">{{'IDM.TENANT-MGMT.EDIT-TENANT' | translate}}</a></li>
+                        <li ng-click="deleteTenants()"><a href="">{{'IDM.TENANT-MGMT.DELETE-TENANT' | translate}}</a></li>
+                    </ul>
+                </div>
+
+            </div>
             <div>
                 <h2>{{'IDM.TENANT-MGMT.TITLE' | translate}}</h2>
             </div>
@@ -36,8 +49,8 @@
                             <th width="50%">{{'IDM.TENANT-MGMT.NAME' | translate}}</th>
                             <th width="50%">{{'IDM.TENANT-MGMT.ID' | translate}}</th>
                         </tr>
-                        <tr ng-repeat="tenant in model.tenants.data">
-                            <td class="control"><input type="checkbox" ng-checked="model.selectedUsers[user.id]"></td>
+                        <tr ng-repeat="tenant in model.tenants" ng-click="toggleTenantSelection(tenant)" ng-class="{'selected': model.selectedTenants[tenant.id]}">
+                            <td class="control"><input type="checkbox" ng-checked="model.selectedTenants[tenant.id]"></td>
                             <td>{{tenant.name}}</td>
                             <td>{{tenant.id}}</td>
                         </tr>
