@@ -37,7 +37,8 @@ flowableApp.controller('TenantMgmtController', ['$rootScope', '$scope', '$transl
         $scope.createTenant = function() {
             $scope.model.loading = true;
             IdmService.createTenant($scope.model.editedTenant).then(function (data) {
-                $scope.fetchTenants(data.id);
+                $scope.loadTenants();
+                $scope.toggleTenantSelection(data);
                 $scope.model.loading = false;
             });
         };
@@ -60,11 +61,11 @@ flowableApp.controller('TenantMgmtController', ['$rootScope', '$scope', '$transl
 
         $scope.editTenantDetails = function() {
 
-            $scope.model.tenant = undefined;
+            $scope.model.editedTenant = undefined;
             $scope.model.mode = 'edit';
             var selectedTenants = $scope.getSelectedTenants();
             if (selectedTenants && selectedTenants.length == 1) {
-                $scope.model.tenant = selectedTenants[0];
+                $scope.model.editedTenant = selectedTenants[0];
             }
 
             $scope.model.errorMessage = undefined;
@@ -78,22 +79,12 @@ flowableApp.controller('TenantMgmtController', ['$rootScope', '$scope', '$transl
         $scope.deleteTenants = function() {
             $scope.model.loading = true;
             $scope.getSelectedTenants().forEach(function(selectedTenant) {
-                $http({method: 'DELETE', url: FLOWABLE.CONFIG.contextRoot + '/app/rest/admin/tenants/' + selectedTenant.id}).
-                    success(function (data, status, headers, config) {
+                IdmService.deleteTenant(selectedTenant.id).then(function (data) {
+                    $rootScope.addAlert('Tenant deleted', 'info');
+                    $scope.loadTenants();
 
-                        $rootScope.addAlert('Tenant deleted', 'info');
-                        $scope.loadTenants();
-
-                        $scope.model.loading = false;
-                    }).
-                    error(function (data, status, headers, config) {
-                        $scope.model.loading = false;
-                        if (data && data.message) {
-                            $rootScope.addAlert(data.message, 'error');
-                        } else {
-                            $rootScope.addAlert('Error while deleting tenant', 'error');
-                        }
-                    });
+                    $scope.model.loading = false;
+                });
             });
         };
 
@@ -109,14 +100,10 @@ flowableApp.controller('TenantMgmtController', ['$rootScope', '$scope', '$transl
                 filter: $scope.model.pendingFilterText,
             };
 
-            $http({method: 'GET', url: FLOWABLE.CONFIG.contextRoot + '/app/rest/admin/tenants', params: params}).
-                success(function(data, status, headers, config) {
-                    $scope.model.tenants = data;
-                    $scope.model.loading = false;
-                }).
-                error(function(data, status, headers, config) {
-                    $scope.model.loading = false;
-                });
+            IdmService.getTenants().then(function (data) {
+                $scope.model.tenants = data;
+                $scope.model.loading = false;
+            });
         };
 
         $scope.toggleTenantSelection = function(tenant) {
@@ -132,8 +119,8 @@ flowableApp.controller('TenantMgmtController', ['$rootScope', '$scope', '$transl
 
         $scope.getSelectedTenants = function() {
             var selected = [];
-            for(var i = 0; i<$scope.model.tenants.size; i++) {
-                var tenant = $scope.model.tenants.data[i];
+            for(var i = 0; i<$scope.model.tenants.length; i++) {
+                var tenant = $scope.model.tenants[i];
                 if(tenant) {
                     for(var prop in $scope.model.selectedTenants) {
                         if(tenant.id == prop) {

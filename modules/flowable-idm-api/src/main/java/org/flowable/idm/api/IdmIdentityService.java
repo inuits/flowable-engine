@@ -287,4 +287,24 @@ public interface IdmIdentityService {
      */
     Tenant newTenant(String tenantId);
 
+    /**
+     * @param userId
+     *            the userId, cannot be null.
+     * @param tenantId
+     *            the tenantId, cannot be null.
+     * @throws RuntimeException
+     *             when the given user or tenant doesn't exist or when the user is already member of the tenant.
+     */
+    void createTenantMembership(String userId, String tenantId);
+
+    /**
+     * Delete the membership of the user in the tenant. When the tenant or user don't exist or when the user is not a member of the tenant, this operation is ignored.
+     * 
+     * @param userId
+     *            the user's id, cannot be null.
+     * @param tenantId
+     *            the tenant's id, cannot be null.
+     */
+    void deleteTenantMembership(String userId, String tenantId);
+
 }

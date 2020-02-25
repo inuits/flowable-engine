@@ -95,6 +95,11 @@
                             <li ng-class="{active: navigation.sub == 'content-items'}"><a href="#content-items" translate="GENERAL.MENU.CONTENT-ITEMS"></a></li>
                         </ul>
                     </div>
+                    <div class="tenant-switcher">
+                        <select class="form-control" ng-model="account.chosenTenant">
+                            <option ng-repeat="tenant in account.tenants" value="{{tenant.id}}">{{tenant.name}}</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- /.nav-collapse -->

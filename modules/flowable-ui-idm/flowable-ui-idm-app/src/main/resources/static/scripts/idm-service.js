@@ -262,10 +262,11 @@ angular.module('flowableApp').service('IdmService', ['$http', '$q', '$rootScope'
             TENANTS
         */
 
-        this.getTenants = function() {
+        this.getTenants = function(params) {
             return httpAsPromise({
                 method: 'GET',
-                url: FLOWABLE.CONFIG.contextRoot + '/app/rest/admin/tenants'
+                url: FLOWABLE.CONFIG.contextRoot + '/app/rest/admin/tenants',
+                params: params
             })
         };
 

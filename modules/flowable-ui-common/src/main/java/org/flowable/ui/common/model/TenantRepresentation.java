@@ -21,7 +21,6 @@ public class TenantRepresentation extends AbstractRepresentation {
 
     protected String id;
     protected String name;
-    protected String type;
 
     public TenantRepresentation() {
     }

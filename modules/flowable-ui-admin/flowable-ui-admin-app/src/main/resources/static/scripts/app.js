@@ -478,7 +478,19 @@ flowableAdminApp
 		              	$rootScope.account = data;
 		               	$rootScope.authenticated = true;
 		               	$rootScope.loadServerConfig(false);
-		          	});
+                      });
+                      
+                $http.get('/app/rest/admin/tenants')
+                    .success(function (data, status, headers, config) {
+                        var tenantIdArray = $rootScope.account.tenantId.split(",");
+                        for (let index = 0; index < tenantIdArray.length; index++) {
+                            var tenant = data.find(x => x.id === tenantIdArray[index]);
+                            if(tenant) {
+                                tenantIdArray[index] = tenant;
+                            }
+                        }
+                        $rootScope.account.tenants = tenantIdArray;
+                    });
 
 	        	$rootScope.loadProcessDefinitionsCache = function() {
                     var promise = $http({

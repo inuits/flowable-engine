@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+  
+<mapper namespace="org.flowable.idm.engine.impl.persistence.entity.TenantEntityImpl">
+
+  <!-- TENANT INSERT -->
+
+  <insert id="insertTenant" parameterType="org.flowable.idm.engine.impl.persistence.entity.TenantEntityImpl">
+    insert into ${prefix}ACT_ID_TENANT (ID_, REV_, NAME_)
+    values (
+      #{id ,jdbcType=VARCHAR},
+      1, 
+      #{name ,jdbcType=VARCHAR}
+    )
+  </insert>
+
+  <insert id="bulkInsertTenant" parameterType="java.util.List">
+    insert into ${prefix}ACT_ID_TENANT (ID_, REV_, NAME_)
+    values 
+      <foreach collection="list" item="tenant" index="index" separator=",">
+        (#{tenant.id ,jdbcType=VARCHAR},
+         1,
+         #{tenant.name ,jdbcType=VARCHAR}
+      </foreach>
+  </insert>
+
+  <insert id="bulkInsertTenant" databaseId="oracle" parameterType="java.util.List">
+    INSERT ALL 
+      <foreach collection="list" item="tenant" index="index">
+        INTO ${prefix}ACT_ID_TENANT (ID_, REV_, NAME_) VALUES 
+            (#{tenant.id ,jdbcType=VARCHAR},
+             1,
+             #{tenant.name ,jdbcType=VARCHAR}
+      </foreach>
+    SELECT * FROM dual
+  </insert>
+
+  <!-- TENANT UPDATE -->
+  
+  <update id="updateTenant" parameterType="org.flowable.idm.engine.impl.persistence.entity.TenantEntityImpl">
+    update ${prefix}ACT_ID_TENANT set
+      REV_ = #{revisionNext ,jdbcType=INTEGER},
+      NAME_ = #{name ,jdbcType=VARCHAR}
+    where ID_ = #{id}
+       and REV_ = #{revision}
+  </update>
+  
+  <!-- TENANT DELETE -->
+
+  <delete id="deleteTenant" parameterType="org.flowable.idm.engine.impl.persistence.entity.TenantEntityImpl">
+    delete from ${prefix}ACT_ID_TENANT where ID_ = #{id} and REV_ = #{revision} 
+  </delete>
+
+  <!-- TENANT RESULTMAP -->
+
+  <resultMap id="tenantResultMap" type="org.flowable.idm.engine.impl.persistence.entity.TenantEntityImpl">
+    <id property="id" column="ID_" jdbcType="VARCHAR" />
+    <result property="revision" column="REV_" jdbcType="INTEGER" />
+    <result property="name" column="NAME_" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <!-- TENANT SELECT -->
+
+  <select id="selectTenant" parameterType="string" resultMap="tenantResultMap">
+    select * from ${prefix}ACT_ID_TENANT where ID_ = #{id, jdbcType=VARCHAR}
+  </select>
+  
+  <select id="selectTenantByQueryCriteria" parameterType="org.flowable.idm.engine.impl.TenantQueryImpl" resultMap="tenantResultMap">
+  	<if test="firstResult != null and firstResult &gt;= 0">${limitBefore}</if>
+    select RES.* <if test="firstResult != null and firstResult &gt;= 0">${limitBetween}</if>
+    <include refid="selectTenantByQueryCriteriaSql" />
+    ${orderBy}
+    <if test="firstResult != null and firstResult &gt;= 0">${limitAfter}</if>
+  </select>
+  
+   <select id="selectTenantCountByQueryCriteria" parameterType="org.flowable.idm.engine.impl.TenantQueryImpl" resultType="long">
+    select count(RES.ID_)
+    <include refid="selectTenantByQueryCriteriaSql" />
+  </select>
+  
+  <sql id="selectTenantByQueryCriteriaSql">
+    from ${prefix}ACT_ID_TENANT RES
+    <where>
+      <if test="id != null">
+        RES.ID_ = #{id}
+      </if>
+      <if test="ids != null &amp;&amp; ids.size() &gt; 0">
+        and RES.ID_ IN
+        <foreach item="id" index="index" collection="ids" 
+                 open="(" separator="," close=")">
+          #{id}
+        </foreach>
+      </if>
+      <if test="name != null">
+        and RES.NAME_ = #{name}
+      </if>
+      <if test="nameLike != null">
+        and RES.NAME_ like #{nameLike}${wildcardEscapeClause}
+      </if>
+      <if test="nameLikeIgnoreCase != null">
+        and lower(RES.NAME_) like #{nameLikeIgnoreCase}${wildcardEscapeClause}
+      </if>
+    </where>
+  </sql>
+
+  <select id="selectTenantByNativeQuery" parameterType="java.util.Map" resultMap="tenantResultMap">
+    <include refid="org.flowable.idm.engine.db.common.selectByNativeQuery"/>
+  </select>
+
+  <select id="selectTenantCountByNativeQuery" parameterType="java.util.Map" resultType="long">
+    ${sql}
+  </select>
+  
+</mapper>

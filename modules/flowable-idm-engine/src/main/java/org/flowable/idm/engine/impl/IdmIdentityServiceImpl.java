@@ -40,6 +40,9 @@ import org.flowable.idm.engine.impl.cmd.CreateGroupQueryCmd;
 import org.flowable.idm.engine.impl.cmd.CreateMembershipCmd;
 import org.flowable.idm.engine.impl.cmd.CreatePrivilegeCmd;
 import org.flowable.idm.engine.impl.cmd.CreatePrivilegeQueryCmd;
+import org.flowable.idm.engine.impl.cmd.CreateTenantCmd;
+import org.flowable.idm.engine.impl.cmd.CreateTenantQueryCmd;
+import org.flowable.idm.engine.impl.cmd.CreateTenantMembershipCmd;
 import org.flowable.idm.engine.impl.cmd.CreateTokenCmd;
 import org.flowable.idm.engine.impl.cmd.CreateTokenQueryCmd;
 import org.flowable.idm.engine.impl.cmd.CreateUserCmd;
@@ -48,6 +51,8 @@ import org.flowable.idm.engine.impl.cmd.DeleteGroupCmd;
 import org.flowable.idm.engine.impl.cmd.DeleteMembershipCmd;
 import org.flowable.idm.engine.impl.cmd.DeletePrivilegeCmd;
 import org.flowable.idm.engine.impl.cmd.DeletePrivilegeMappingCmd;
+import org.flowable.idm.engine.impl.cmd.DeleteTenantCmd;
+import org.flowable.idm.engine.impl.cmd.DeleteTenantMembershipCmd;
 import org.flowable.idm.engine.impl.cmd.DeleteTokenCmd;
 import org.flowable.idm.engine.impl.cmd.DeleteUserCmd;
 import org.flowable.idm.engine.impl.cmd.DeleteUserInfoCmd;
@@ -58,15 +63,12 @@ import org.flowable.idm.engine.impl.cmd.GetUserInfoKeysCmd;
 import org.flowable.idm.engine.impl.cmd.GetUserPictureCmd;
 import org.flowable.idm.engine.impl.cmd.GetUsersWithPrivilegeCmd;
 import org.flowable.idm.engine.impl.cmd.SaveGroupCmd;
+import org.flowable.idm.engine.impl.cmd.SaveTenantCmd;
 import org.flowable.idm.engine.impl.cmd.SaveTokenCmd;
 import org.flowable.idm.engine.impl.cmd.SaveUserCmd;
 import org.flowable.idm.engine.impl.cmd.SetUserInfoCmd;
 import org.flowable.idm.engine.impl.cmd.SetUserPictureCmd;
 import org.flowable.idm.engine.impl.cmd.UpdateUserPasswordCmd;
-import org.flowable.idm.engine.impl.cmd.CreateTenantCmd;
-import org.flowable.idm.engine.impl.cmd.SaveTenantCmd;
-import org.flowable.idm.engine.impl.cmd.DeleteTenantCmd;
-import org.flowable.idm.engine.impl.cmd.CreateTenantQueryCmd;
 import org.flowable.idm.engine.impl.persistence.entity.IdentityInfoEntity;
 
 /**
@@ -274,5 +276,13 @@ public class IdmIdentityServiceImpl extends CommonEngineServiceImpl<IdmEngineCon
         return commandExecutor.execute(new CreateTenantQueryCmd());
     }
 
+    @Override
+    public void createTenantMembership(String userId, String tenantId) {
+        commandExecutor.execute(new CreateTenantMembershipCmd(userId, tenantId));
+    }
 
+    @Override
+    public void deleteTenantMembership(String userId, String tenantId) {
+        commandExecutor.execute(new DeleteTenantMembershipCmd(userId, tenantId));
+    }
 }

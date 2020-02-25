@@ -43,6 +43,12 @@ public interface TenantQuery extends Query<TenantQuery, Tenant> {
      */
     TenantQuery tenantNameLikeIgnoreCase(String tenantNameLikeIgnoreCase);
 
+    /** Only selects {@link Tenant}s where the given user is a member of. */
+    TenantQuery tenantMember(String tenantMemberUserId);
+
+    /** Only selects {@link Tenant}s where the given users are a member of. */
+    TenantQuery tenantMembers(List<String> tenantMemberUserIds);
+
     // sorting ////////////////////////////////////////////////////////
 
     /**

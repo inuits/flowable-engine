@@ -39,6 +39,7 @@ public class TenantEntityManagerImpl
     public Tenant createNewTenant(String tenantId) {
         TenantEntity tenantEntity = dataManager.create();
         tenantEntity.setId(tenantId);
+        tenantEntity.setRevision(0);
         return tenantEntity;
     }
 
