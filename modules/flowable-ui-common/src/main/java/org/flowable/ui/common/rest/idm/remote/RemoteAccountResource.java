@@ -16,7 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.flowable.ui.common.model.GroupRepresentation;
+import org.flowable.ui.common.model.TenantRepresentation;
 import org.flowable.ui.common.model.RemoteGroup;
+import org.flowable.ui.common.model.RemoteTenant;
 import org.flowable.ui.common.model.RemoteUser;
 import org.flowable.ui.common.model.UserRepresentation;
 import org.flowable.ui.common.security.SecurityUtils;
@@ -58,6 +60,13 @@ public class RemoteAccountResource {
                     userRepresentation.setPrivileges(remoteUser.getPrivileges());
                 }
 
+                if (remoteUser.getTenants() != null && remoteUser.getTenants().size() > 0) {
+                    List<TenantRepresentation> tenants = new ArrayList<>();
+                    for (RemoteTenant remoteTenant : remoteUser.getTenants()) {
+                        tenants.add(new TenantRepresentation(remoteTenant));
+                    }
+                    userRepresentation.setTenants(tenants);
+                }
             }
         }
 

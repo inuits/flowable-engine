@@ -13,11 +13,14 @@
 package org.flowable.ui.idm.rest.app;
 
 import org.flowable.idm.api.User;
+import org.flowable.idm.api.Tenant;
 import org.flowable.ui.common.model.ResultListDataRepresentation;
 import org.flowable.ui.common.model.UserRepresentation;
+import org.flowable.ui.common.model.TenantRepresentation;
 import org.flowable.ui.idm.model.CreateUserRepresentation;
 import org.flowable.ui.idm.model.UpdateUsersRepresentation;
 import org.flowable.ui.idm.service.UserService;
+import org.flowable.ui.idm.service.TenantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,6 +47,9 @@ public class IdmUsersResource {
     @Autowired
     protected UserService userService;
 
+    @Autowired
+    protected TenantService tenantService;
+
     @GetMapping(value = "/rest/admin/users")
     public ResultListDataRepresentation getUsers(
             @RequestParam(required = false) String filter,
@@ -65,7 +71,13 @@ public class IdmUsersResource {
     protected List<UserRepresentation> convertToUserRepresentations(List<User> users) {
         List<UserRepresentation> result = new ArrayList<>(users.size());
         for (User user : users) {
-            result.add(new UserRepresentation(user));
+            UserRepresentation ur = new UserRepresentation(user);
+            tenantService.getTenantsForUser(user.getId()).forEach(
+                (tenant) -> {
+                    ur.getTenants().add(new TenantRepresentation(tenant));
+                }
+            );
+            result.add(ur);
         }
         return result;
     }
@@ -75,8 +87,15 @@ public class IdmUsersResource {
     public void updateUserDetails(@PathVariable String userId, @RequestBody UpdateUsersRepresentation updateUsersRepresentation) {
         userService.updateUserDetails(userId, updateUsersRepresentation.getFirstName(),
                 updateUsersRepresentation.getLastName(),
-                updateUsersRepresentation.getEmail(),
-                updateUsersRepresentation.getTenantId());
+                updateUsersRepresentation.getEmail()
+                //updateUsersRepresentation.getTenants()
+                );
+
+        updateUsersRepresentation.getTenants().forEach(
+            (tenant) -> {
+                tenantService.addTenantMember(tenant, userId);
+            }
+        );
     }
 
     @ResponseStatus(value = HttpStatus.OK)
@@ -93,13 +112,20 @@ public class IdmUsersResource {
 
     @PostMapping(value = "/rest/admin/users")
     public UserRepresentation createNewUser(@RequestBody CreateUserRepresentation userRepresentation) {
+        userRepresentation.getTenants().forEach(
+            (tenant) -> {
+                tenantService.addTenantMember(tenant.getId(), userRepresentation.getId());
+            }
+        );
+
         return new UserRepresentation(userService.createNewUser(
                 userRepresentation.getId(),
                 userRepresentation.getFirstName(),
                 userRepresentation.getLastName(),
                 userRepresentation.getEmail(),
-                userRepresentation.getPassword(),
-                userRepresentation.getTenantId()));
+                userRepresentation.getPassword()
+                //userRepresentation.getTenants()
+                ));
     }
 
 }

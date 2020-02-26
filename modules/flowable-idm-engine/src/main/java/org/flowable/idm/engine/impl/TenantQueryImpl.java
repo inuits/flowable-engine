@@ -37,6 +37,8 @@ public class TenantQueryImpl extends AbstractQuery<TenantQuery, Tenant> implemen
     protected String name;
     protected String nameLike;
     protected String nameLikeIgnoreCase;
+    protected String userId;
+    protected List<String> userIds;
 
     public TenantQueryImpl() {
     }
@@ -95,6 +97,24 @@ public class TenantQueryImpl extends AbstractQuery<TenantQuery, Tenant> implemen
         return this;
     }
 
+    @Override
+    public TenantQuery tenantMember(String userId) {
+        if (userId == null) {
+            throw new FlowableIllegalArgumentException("Provided userId is null");
+        }
+        this.userId = userId;
+        return this;
+    }
+
+    @Override
+    public TenantQuery tenantMembers(List<String> userIds) {
+        if (userIds == null) {
+            throw new FlowableIllegalArgumentException("Provided userIds is null");
+        }
+        this.userIds = userIds;
+        return this;
+    }
+
 
     // sorting //////////////////////////////////////////////////////////
 
@@ -141,5 +161,13 @@ public class TenantQueryImpl extends AbstractQuery<TenantQuery, Tenant> implemen
 
     public String getNameLikeIgnoreCase() {
         return nameLikeIgnoreCase;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public List<String> getUserIds() {
+        return userIds;
     }
 }

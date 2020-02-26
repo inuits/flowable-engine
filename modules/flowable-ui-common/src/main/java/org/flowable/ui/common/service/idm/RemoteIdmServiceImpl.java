@@ -30,6 +30,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.flowable.ui.common.model.RemoteGroup;
+import org.flowable.ui.common.model.RemoteTenant;
 import org.flowable.ui.common.model.RemoteToken;
 import org.flowable.ui.common.model.RemoteUser;
 import org.flowable.ui.common.properties.FlowableCommonAppProperties;
@@ -201,6 +202,12 @@ public class RemoteIdmServiceImpl implements RemoteIdmService {
         if (json.has("privileges")) {
             for (JsonNode privilegeNode : ((ArrayNode) json.get("privileges"))) {
                 user.getPrivileges().add(privilegeNode.asText());
+            }
+        }
+
+        if (json.has("tenants")) {
+            for (JsonNode tenantNode : ((ArrayNode) json.get("tenants"))) {
+                user.getTenants().add(new RemoteTenant(tenantNode.get("id").asText(), tenantNode.get("name").asText()));
             }
         }
 

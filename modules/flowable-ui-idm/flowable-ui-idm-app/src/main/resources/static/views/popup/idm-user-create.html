@@ -57,7 +57,7 @@
                         <div class="form-group">
                             <label class="control-label">{{'IDM.USER-MGMT.POPUP.CREATE-TENANT' | translate}}</label>
                             <!-- <input type="text" class="form-control" ng-model="model.user.tenantId"> -->
-                            <button type="button" class="btn btn-default" ng-model="model.user.tenantId" attr.data-placeholder="{{'IDM.USER-MGMT.POPUP.PLACEHOLDER-TENANT' | translate}}" data-html="1" data-multiple="1" ng-options="tenant.id as tenant.name for tenant in tenants" bs-select>
+                            <button type="button" class="btn btn-default" ng-model="model.user.currentTenants" attr.data-placeholder="{{'IDM.USER-MGMT.POPUP.PLACEHOLDER-TENANT' | translate}}" data-html="1" data-multiple="1" ng-options="tenant.id as tenant.name for tenant in tenants" bs-select>
                                 Action <span class="caret"></span>
                             </button>
                         </div>

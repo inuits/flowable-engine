@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.flowable.idm.api.Group;
+import org.flowable.idm.api.Tenant;
 import org.flowable.idm.api.Privilege;
 import org.flowable.idm.api.User;
 import org.flowable.idm.api.UserQuery;
@@ -79,7 +80,7 @@ public class UserServiceImpl extends AbstractIdmService implements UserService {
             user.setFirstName(firstName);
             user.setLastName(lastName);
             user.setEmail(email);
-            user.setTenantId(tenantId);
+            //user.setTenantId(tenantId);
             identityService.saveUser(user);
         }
     }
@@ -133,7 +134,7 @@ public class UserServiceImpl extends AbstractIdmService implements UserService {
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setEmail(email);
-        user.setTenantId(tenantId);
+        //user.setTenantId(tenantId);
         identityService.saveUser(user);
 
         User savedUser = identityService.createUserQuery().userId(id).singleResult();
@@ -169,7 +170,9 @@ public class UserServiceImpl extends AbstractIdmService implements UserService {
             }
         }
 
-        return new UserInformation(user, groups, new ArrayList<>(privilegeNames));
+        List<Tenant> tenants = identityService.createTenantQuery().tenantMember(userId).list();
+
+        return new UserInformation(user, groups, new ArrayList<>(privilegeNames), tenants);
     }
 
 }

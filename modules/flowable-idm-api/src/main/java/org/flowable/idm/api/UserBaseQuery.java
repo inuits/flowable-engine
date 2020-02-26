@@ -121,6 +121,16 @@ public interface UserBaseQuery<T extends UserBaseQuery<T, U>, U extends User> ex
      */
     T tenantId(String tenantId);
 
+    /**
+     * Only select {@link User}s that belong to the given tenant.
+     */
+    T memberOfTenant(String tenantId);
+
+    /**
+     * Only select {@link User}s that belong to the given tenants.
+     */
+    T memberOfTenants(List<String> tenantIds);
+
     // sorting ////////////////////////////////////////////////////////
 
     /**

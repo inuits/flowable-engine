@@ -15,7 +15,9 @@ package org.flowable.ui.idm.rest.app;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.flowable.idm.api.Group;
+import org.flowable.idm.api.Tenant;
 import org.flowable.ui.common.model.GroupRepresentation;
+import org.flowable.ui.common.model.TenantRepresentation;
 import org.flowable.ui.common.model.UserRepresentation;
 import org.flowable.ui.common.security.SecurityUtils;
 import org.flowable.ui.common.service.exception.NotFoundException;
@@ -76,6 +78,11 @@ public class AccountResource {
             if (userInformation.getPrivileges() != null) {
                 for (String privilege : userInformation.getPrivileges()) {
                     userRepresentation.getPrivileges().add(privilege);
+                }
+            }
+            if (userInformation.getTenants() != null) {
+                for (Tenant tenant : userInformation.getTenants()) {
+                    userRepresentation.getTenants().add(new TenantRepresentation(tenant));
                 }
             }
             return userRepresentation;

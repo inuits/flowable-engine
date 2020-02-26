@@ -83,7 +83,9 @@
                             <td>{{user.id}}</td>
                             <td>{{user.email}}</td>
                             <td>{{user.fullName}}</td>
-                            <td>{{user.tenantNames}}</td>
+                            <td>
+                                <p ng-repeat="tenant in user.tenants">{{tenant.name}}</p>
+                            </td>
                         </tr>
                     </table>
                 </div>

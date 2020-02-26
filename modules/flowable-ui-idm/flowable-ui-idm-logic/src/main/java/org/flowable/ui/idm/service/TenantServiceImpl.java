@@ -17,6 +17,8 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.flowable.idm.api.Tenant;
 import org.flowable.idm.api.TenantQuery;
+import org.flowable.idm.api.User;
+import org.flowable.idm.api.UserQuery;
 import org.flowable.ui.common.service.exception.BadRequestException;
 import org.flowable.ui.common.service.exception.ConflictingRequestException;
 import org.flowable.ui.common.service.exception.NotFoundException;
@@ -76,6 +78,56 @@ public class TenantServiceImpl extends AbstractIdmService implements TenantServi
         identityService.saveTenant(tenant);
 
         return tenant;
+    }
+
+    public void addTenantMember(String tenantId, String userId) {
+        verifyTenantMemberExists(tenantId, userId);
+        Tenant tenant = identityService.createTenantQuery().tenantId(tenantId).singleResult();
+        if (tenant == null) {
+            throw new NotFoundException();
+        }
+
+        User user = identityService.createUserQuery().userId(userId).singleResult();
+        if (user == null) {
+            throw new NotFoundException();
+        }
+
+        identityService.createTenantMembership(userId, tenantId);
+    }
+
+    public void deleteTenantMember(String tenantId, String userId) {
+        verifyTenantMemberExists(tenantId, userId);
+        Tenant tenant = identityService.createTenantQuery().tenantId(tenantId).singleResult();
+        if (tenant == null) {
+            throw new NotFoundException();
+        }
+
+        User user = identityService.createUserQuery().userId(userId).singleResult();
+        if (user == null) {
+            throw new NotFoundException();
+        }
+
+        identityService.deleteTenantMembership(userId, tenantId);
+    }
+
+    protected void verifyTenantMemberExists(String tenantId, String userId) {
+        // Check existence
+        Tenant tenant = identityService.createTenantQuery().tenantId(tenantId).singleResult();
+        User user = identityService.createUserQuery().userId(userId).singleResult();
+        for (User tenantMember : identityService.createUserQuery().memberOfTenant(tenantId).list()) {
+            if (tenantMember.getId().equals(userId)) {
+                user = tenantMember;
+            }
+        }
+
+        if (tenant == null || user == null) {
+            throw new NotFoundException();
+        }
+    }
+
+    @Override
+    public List<Tenant> getTenantsForUser(String userId) {
+        return identityService.createTenantQuery().tenantMember(userId).list();
     }
 
 }

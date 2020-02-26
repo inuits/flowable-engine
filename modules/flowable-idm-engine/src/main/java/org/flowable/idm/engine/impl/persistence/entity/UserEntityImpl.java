@@ -15,6 +15,7 @@ package org.flowable.idm.engine.impl.persistence.entity;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 import org.flowable.common.engine.impl.db.HasRevision;
 import org.flowable.idm.api.Picture;
