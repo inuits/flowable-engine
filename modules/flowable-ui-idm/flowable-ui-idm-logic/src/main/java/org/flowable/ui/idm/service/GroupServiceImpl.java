@@ -25,6 +25,10 @@ import org.flowable.ui.idm.constant.GroupTypes;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author Joram Barrez
  */
@@ -32,8 +36,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class GroupServiceImpl extends AbstractIdmService implements GroupService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GroupServiceImpl.class);
+
     @Override
     public List<Group> getGroupsForUser(String userId) {
+
+        LOGGER.info("-------------------------- userId {}", userId);
+        LOGGER.info("-------------------------- groupMember {}", identityService.createGroupQuery().groupMember(userId).list().toString());
+
         return identityService.createGroupQuery().groupMember(userId).list();
     }
 

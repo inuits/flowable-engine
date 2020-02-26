@@ -18,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.flowable.idm.api.Tenant;
 import org.flowable.idm.api.TenantQuery;
 import org.flowable.idm.api.User;
-import org.flowable.idm.api.UserQuery;
 import org.flowable.ui.common.service.exception.BadRequestException;
 import org.flowable.ui.common.service.exception.ConflictingRequestException;
 import org.flowable.ui.common.service.exception.NotFoundException;

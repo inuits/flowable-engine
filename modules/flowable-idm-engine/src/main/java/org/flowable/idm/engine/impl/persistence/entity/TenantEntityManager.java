@@ -39,4 +39,6 @@ public interface TenantEntityManager extends EntityManager<TenantEntity> {
     long findTenantCountByNativeQuery(Map<String, Object> parameterMap);
 
     boolean isNewTenant(Tenant tenant);
+
+    List<Tenant> findTenantsByUser(String userId);
 }

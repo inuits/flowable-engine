@@ -63,4 +63,10 @@ public class MybatisTenantDataManager extends AbstractIdmDataManager<TenantEntit
     public long findTenantCountByNativeQuery(Map<String, Object> parameterMap) {
         return (Long) getDbSqlSession().selectOne("selectTenantCountByNativeQuery", parameterMap);
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Tenant> findTenantsByUser(String userId) {
+        return getDbSqlSession().selectList("selectTenantsByUserId", userId);
+    }
 }

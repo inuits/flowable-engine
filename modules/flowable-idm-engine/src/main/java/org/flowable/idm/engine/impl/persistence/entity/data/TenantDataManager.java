@@ -32,4 +32,6 @@ public interface TenantDataManager extends DataManager<TenantEntity> {
     long findTenantCountByQueryCriteria(TenantQueryImpl query);
 
     long findTenantCountByNativeQuery(Map<String, Object> parameterMap);
+
+    List<Tenant> findTenantsByUser(String userId);
 }

@@ -101,6 +101,13 @@
       <if test="nameLikeIgnoreCase != null">
         and lower(RES.NAME_) like #{nameLikeIgnoreCase}${wildcardEscapeClause}
       </if>
+      <if test="userId != null">
+        and exists(select 1 from ${prefix}ACT_ID_TENANT_MEMBERSHIP M where M.TENANT_ID_ = RES.ID_ and M.USER_ID_ = #{userId})
+      </if>
+      <if test="userIds != null &amp;&amp; userIds.size() &gt; 0">
+        and exists(select 1 from ${prefix}ACT_ID_TENANT_MEMBERSHIP M where M.TENANT_ID_ = RES.ID_ and M.USER_ID_ in  
+            <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">#{userId}</foreach>)
+      </if>
     </where>
   </sql>
 
@@ -110,6 +117,13 @@
 
   <select id="selectTenantCountByNativeQuery" parameterType="java.util.Map" resultType="long">
     ${sql}
+  </select>
+
+  <select id="selectTenantsByUserId" parameterType="org.flowable.common.engine.impl.db.ListQueryParameterObject" resultMap="tenantResultMap">
+    select t.*
+    from ${prefix}ACT_ID_TENANT g, ${prefix}ACT_ID_TENANT_MEMBERSHIP membership
+    where t.ID_ = membership.TENANT_ID_
+      and membership.USER_ID_ = #{parameter}
   </select>
   
 </mapper>

@@ -72,4 +72,9 @@ public class TenantEntityManagerImpl
     public long findTenantCountByNativeQuery(Map<String, Object> parameterMap) {
         return dataManager.findTenantCountByNativeQuery(parameterMap);
     }
+
+    @Override
+    public List<Tenant> findTenantsByUser(String userId) {
+        return dataManager.findTenantsByUser(userId);
+    }
 }
