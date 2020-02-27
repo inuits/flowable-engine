@@ -13,7 +13,6 @@
 package org.flowable.ui.idm.rest.app;
 
 import org.flowable.idm.api.User;
-import org.flowable.idm.api.Tenant;
 import org.flowable.ui.common.model.ResultListDataRepresentation;
 import org.flowable.ui.common.model.UserRepresentation;
 import org.flowable.ui.common.model.TenantRepresentation;
@@ -39,6 +38,7 @@ import java.util.List;
 /**
  * @author Frederik Heremans
  * @author Joram Barrez
+ * @author Ruben De Swaef
  */
 @RestController
 @RequestMapping("/app")
@@ -85,9 +85,14 @@ public class IdmUsersResource {
     @ResponseStatus(value = HttpStatus.OK)
     @PutMapping(value = "/rest/admin/users/{userId}")
     public void updateUserDetails(@PathVariable String userId, @RequestBody UpdateUsersRepresentation updateUsersRepresentation) {
+        String tenantId = null;
+        if(!updateUsersRepresentation.getTenants().isEmpty()){
+            tenantId = updateUsersRepresentation.getTenants().get(0);
+        }
         userService.updateUserDetails(userId, updateUsersRepresentation.getFirstName(),
                 updateUsersRepresentation.getLastName(),
-                updateUsersRepresentation.getEmail()
+                updateUsersRepresentation.getEmail(),
+                tenantId
                 );
 
         tenantService.getTenantsForUser(userId).forEach(
@@ -116,12 +121,17 @@ public class IdmUsersResource {
 
     @PostMapping(value = "/rest/admin/users")
     public UserRepresentation createNewUser(@RequestBody CreateUserRepresentation userRepresentation) {
+        String tenantId = null;
+        if(!userRepresentation.getTenants().isEmpty()){
+            tenantId = userRepresentation.getTenantIds().get(0);
+        }
         UserRepresentation ur = new UserRepresentation(userService.createNewUser(
             userRepresentation.getId(),
             userRepresentation.getFirstName(),
             userRepresentation.getLastName(),
             userRepresentation.getEmail(),
-            userRepresentation.getPassword()
+            userRepresentation.getPassword(),
+            tenantId
             ));
 
         userRepresentation.getTenantIds().forEach(

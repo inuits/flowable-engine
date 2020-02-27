@@ -421,8 +421,8 @@ flowableAdminApp
             return input;
           };
         })
-        .run(['$rootScope', '$http', '$timeout', '$location', '$cookies', '$modal', '$translate', '$window',
-            function($rootScope, $http, $timeout, $location, $cookies, $modal, $translate, $window) {
+        .run(['$rootScope', '$http', '$timeout', '$location', '$cookies', '$modal', '$translate', '$window', '$route',
+            function($rootScope, $http, $timeout, $location, $cookies, $modal, $translate, $window, $route) {
 
                 // set angular translate fallback language
                 $translate.fallbackLanguage(['en']);
@@ -475,10 +475,25 @@ flowableAdminApp
 
         		$http.get('/app/rest/account')
 		        	.success(function (data, status, headers, config) {
-		              	$rootScope.account = data;
+                        $rootScope.account = data;
 		               	$rootScope.authenticated = true;
 		               	$rootScope.loadServerConfig(false);
                       });
+
+                $rootScope.changeCurrentTenant = function() {
+                    var promise = $http({
+                        method: 'PUT',
+                        url: '/app/rest/account/tenant',
+                        data: $rootScope.account
+                    }).success(function (data, status, headers, config) {
+                        $route.reload();
+                        return data;
+                    }).error(function (data, status, headers, config) {
+                        return {'status': false};
+                    });
+
+                    return promise;
+                };
 
 	        	$rootScope.loadProcessDefinitionsCache = function() {
                     var promise = $http({

@@ -27,6 +27,7 @@ public class UserRepresentation extends AbstractRepresentation {
     protected String lastName;
     protected String email;
     protected String fullName;
+    protected String tenantId;
     protected List<GroupRepresentation> groups = new ArrayList<>();
     protected List<String> privileges = new ArrayList<>();
     protected List<TenantRepresentation> tenants = new ArrayList<>();
@@ -41,6 +42,7 @@ public class UserRepresentation extends AbstractRepresentation {
         setFirstName(user.getFirstName());
         setLastName(user.getLastName());
         setFullName((user.getFirstName() != null ? user.getFirstName() : "") + " " + (user.getLastName() != null ? user.getLastName() : ""));
+        setTenantId(user.getTenantId());
         setEmail(user.getEmail());
     }
 
@@ -84,16 +86,16 @@ public class UserRepresentation extends AbstractRepresentation {
         this.fullName = fullName;
     }
 
-    // public String getTenantId() {
-    //     return tenantId;
-    // }
+    public String getTenantId() {
+        return tenantId;
+    }
 
-    // public void setTenantId(String tenantId) {
-    //     if (tenantId == null || tenantId.isEmpty())
-    //         this.tenantId = null;
-    //     else
-    //         this.tenantId = tenantId;
-    // }
+    public void setTenantId(String tenantId) {
+        if (tenantId == null || tenantId.isEmpty())
+            this.tenantId = null;
+        else
+            this.tenantId = tenantId;
+    }
     
     public List<GroupRepresentation> getGroups() {
         return groups;

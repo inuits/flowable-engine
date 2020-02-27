@@ -80,7 +80,7 @@ public class UserServiceImpl extends AbstractIdmService implements UserService {
             user.setFirstName(firstName);
             user.setLastName(lastName);
             user.setEmail(email);
-            //user.setTenantId(tenantId);
+            user.setTenantId(tenantId);
             identityService.saveUser(user);
         }
     }
@@ -141,7 +141,7 @@ public class UserServiceImpl extends AbstractIdmService implements UserService {
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setEmail(email);
-        //user.setTenantId(tenantId);
+        user.setTenantId(tenantId);
         identityService.saveUser(user);
 
         User savedUser = identityService.createUserQuery().userId(id).singleResult();
