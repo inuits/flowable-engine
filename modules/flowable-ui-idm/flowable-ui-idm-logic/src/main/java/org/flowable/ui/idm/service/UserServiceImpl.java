@@ -107,6 +107,13 @@ public class UserServiceImpl extends AbstractIdmService implements UserService {
                 identityService.deleteMembership(userId, group.getId());
             }
         }
+
+        List<Tenant> tenants = identityService.createTenantQuery().tenantMember(userId).list();
+        if (tenants != null && tenants.size() > 0) {
+            for (Tenant tenant : tenants) {
+                identityService.deleteTenantMembership(userId, tenant.getId());
+            }
+        }
         identityService.deleteUser(userId);
     }
 

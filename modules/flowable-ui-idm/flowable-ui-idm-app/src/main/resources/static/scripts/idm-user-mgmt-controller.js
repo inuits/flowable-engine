@@ -254,7 +254,7 @@ flowableApp.controller('IdmCreateUserPopupController', ['$rootScope', '$scope', 
                 firstName: model.user.firstName,
                 lastName: model.user.lastName,
                 password: model.user.password,
-                tenants: model.user.currentTenants,
+                tenantIds: model.user.currentTenants,
             };
 
             $http({method: 'POST', url: FLOWABLE.CONFIG.contextRoot + '/app/rest/admin/users', data: data}).

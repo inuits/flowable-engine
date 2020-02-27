@@ -88,9 +88,13 @@ public class IdmUsersResource {
         userService.updateUserDetails(userId, updateUsersRepresentation.getFirstName(),
                 updateUsersRepresentation.getLastName(),
                 updateUsersRepresentation.getEmail()
-                //updateUsersRepresentation.getTenants()
                 );
 
+        tenantService.getTenantsForUser(userId).forEach(
+            (tenant) -> {
+                tenantService.deleteTenantMember(tenant.getId(), userId);
+            }
+        );
         updateUsersRepresentation.getTenants().forEach(
             (tenant) -> {
                 tenantService.addTenantMember(tenant, userId);
@@ -112,20 +116,22 @@ public class IdmUsersResource {
 
     @PostMapping(value = "/rest/admin/users")
     public UserRepresentation createNewUser(@RequestBody CreateUserRepresentation userRepresentation) {
-        userRepresentation.getTenants().forEach(
+        UserRepresentation ur = new UserRepresentation(userService.createNewUser(
+            userRepresentation.getId(),
+            userRepresentation.getFirstName(),
+            userRepresentation.getLastName(),
+            userRepresentation.getEmail(),
+            userRepresentation.getPassword()
+            ));
+
+        userRepresentation.getTenantIds().forEach(
             (tenant) -> {
-                tenantService.addTenantMember(tenant.getId(), userRepresentation.getId());
+                tenantService.addTenantMember(tenant, userRepresentation.getId());
+                userRepresentation.getTenants().add(new TenantRepresentation(tenantService.getTenant(tenant)));
             }
         );
 
-        return new UserRepresentation(userService.createNewUser(
-                userRepresentation.getId(),
-                userRepresentation.getFirstName(),
-                userRepresentation.getLastName(),
-                userRepresentation.getEmail(),
-                userRepresentation.getPassword()
-                //userRepresentation.getTenants()
-                ));
+        return ur;
     }
 
 }
