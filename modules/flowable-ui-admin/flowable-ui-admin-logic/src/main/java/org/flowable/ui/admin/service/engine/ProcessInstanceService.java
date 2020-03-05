@@ -30,7 +30,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URIBuilder;
 import org.flowable.ui.admin.domain.ServerConfig;
 import org.flowable.ui.admin.service.engine.exception.FlowableServiceException;
-import org.flowable.ui.common.security.SecurityUtils;
 import org.flowable.ui.common.service.exception.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -23,7 +23,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URIBuilder;
 import org.flowable.ui.admin.domain.ServerConfig;
 import org.flowable.ui.admin.service.engine.exception.FlowableServiceException;
-import org.flowable.ui.common.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

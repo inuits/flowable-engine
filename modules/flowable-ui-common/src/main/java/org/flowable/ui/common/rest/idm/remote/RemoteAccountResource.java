@@ -26,11 +26,8 @@ import org.flowable.ui.common.service.exception.NotFoundException;
 import org.flowable.ui.common.service.idm.RemoteIdmService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.flowable.idm.api.User;
 
 @RestController
 @RequestMapping("/app")
@@ -79,26 +76,4 @@ public class RemoteAccountResource {
             throw new NotFoundException();
         }
     }
-
-    /**
-     * PUT /rest/account/tenant -> changing the currently used tenant.
-     */
-    @PutMapping(value = "/rest/account/tenant", produces = "application/json")
-    public User putTenantAccount(@RequestBody RemoteUser user) {
-        User currentUser = SecurityUtils.getCurrentUserObject();
-        if (currentUser != null) {
-            RemoteUser remoteUser = remoteIdmService.getUser(currentUser.getId());
-            if (remoteUser.getTenants() != null && remoteUser.getTenants().size() > 0) {
-                for (RemoteTenant remoteTenant : remoteUser.getTenants()) {
-                    if(remoteTenant.getId().equals(user.getTenantId())) {
-                        currentUser.setTenantId(user.getTenantId());
-                    }
-                }
-            }
-        } else {
-            throw new NotFoundException();
-        }
-        return currentUser;
-    }
-
 }
