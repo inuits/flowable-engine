@@ -62,26 +62,16 @@ public class TaskService {
 
     public JsonNode listTasks(ServerConfig serverConfig, ObjectNode bodyNode) {
 
-        if( SecurityUtils.getCurrentTenantId() != null ){
-            bodyNode.put("tenantIdLike", SecurityUtils.getCurrentTenantId());
-        }
-
         JsonNode resultNode = null;
         try {
             URIBuilder builder = clientUtil.createUriBuilder(HISTORIC_TASK_QUERY_URL);
-            
-            if (enableTenantFiltering) {
-                final String tenantId = SecurityUtils.getCurrentUserObject().getTenantId();
-                if (tenantId != null) {
-                    bodyNode.put("tenantId", tenantId);
-                }
-            }
+            String tenantId = bodyNode.get("tenantId").toString();
 
             String uri = clientUtil.getUriWithPagingAndOrderParameters(builder, bodyNode);
             HttpPost post = clientUtil.createPost(uri, serverConfig);
 
             post.setEntity(clientUtil.createStringEntity(bodyNode.toString()));
-            resultNode = clientUtil.executeRequest(post, serverConfig);
+            resultNode = clientUtil.executeRequest(post, serverConfig, tenantId);
         } catch (Exception e) {
             throw new FlowableServiceException(e.getMessage(), e);
         }

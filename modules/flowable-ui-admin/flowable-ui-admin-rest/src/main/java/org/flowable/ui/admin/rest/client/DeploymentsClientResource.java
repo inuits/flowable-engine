@@ -53,7 +53,7 @@ public class DeploymentsClientResource extends AbstractClientResource {
         JsonNode resultNode = null;
         ServerConfig serverConfig = retrieveServerConfig(EndpointType.PROCESS);
         Map<String, String[]> parameterMap = getRequestParametersWithoutServerId(request);
-
+        
         try {
             resultNode = clientService.listDeployments(serverConfig, parameterMap);
 

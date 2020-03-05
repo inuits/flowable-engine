@@ -38,11 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 /**
  * Service for invoking Flowable REST services.
  */
@@ -84,19 +79,13 @@ public class ProcessInstanceService {
         JsonNode resultNode = null;
         try {
             URIBuilder builder = new URIBuilder("query/historic-process-instances");
-            
-            if (enableTenantFiltering) {
-                final String tenantId = SecurityUtils.getCurrentUserObject().getTenantId();
-                if (tenantId != null) {
-                    bodyNode.put("tenantId", tenantId);
-                }
-            }
+            String tenantId = bodyNode.get("tenantId").toString();
 
             String uri = clientUtil.getUriWithPagingAndOrderParameters(builder, bodyNode);
             HttpPost post = clientUtil.createPost(uri, serverConfig);
 
             post.setEntity(clientUtil.createStringEntity(bodyNode.toString()));
-            resultNode = clientUtil.executeRequest(post, serverConfig);
+            resultNode = clientUtil.executeRequest(post, serverConfig, tenantId); 
         } catch (Exception e) {
             throw new FlowableServiceException(e.getMessage(), e);
         }

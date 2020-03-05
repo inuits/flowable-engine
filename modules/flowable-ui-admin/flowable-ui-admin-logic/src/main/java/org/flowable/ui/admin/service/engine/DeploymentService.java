@@ -71,8 +71,9 @@ public class DeploymentService {
         for (String name : parameterMap.keySet()) {
             builder.addParameter(name, parameterMap.get(name)[0]);
         }
+
         HttpGet get = new HttpGet(clientUtil.getServerUrl(serverConfig, builder.toString()));
-        return clientUtil.executeRequest(get, serverConfig);
+        return clientUtil.executeRequest(get, serverConfig, parameterMap.get("tenantId")[0]);
     }
 
     public JsonNode getDeployment(ServerConfig serverConfig, String deploymentId) {

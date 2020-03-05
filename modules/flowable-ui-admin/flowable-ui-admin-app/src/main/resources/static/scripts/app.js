@@ -481,18 +481,7 @@ flowableAdminApp
                       });
 
                 $rootScope.changeCurrentTenant = function() {
-                    var promise = $http({
-                        method: 'PUT',
-                        url: '/app/rest/account/tenant',
-                        data: $rootScope.account
-                    }).success(function (data, status, headers, config) {
-                        $route.reload();
-                        return data;
-                    }).error(function (data, status, headers, config) {
-                        return {'status': false};
-                    });
-
-                    return promise;
+                    $route.reload();
                 };
 
 	        	$rootScope.loadProcessDefinitionsCache = function() {
