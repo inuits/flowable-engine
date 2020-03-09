@@ -174,7 +174,7 @@ public class FlowableCookieFilter extends OncePerRequestFilter {
                 for (RemoteTenant remoteTenant : remoteUser.getTenants()) {
                     if(remoteTenant.getId().equals(tenantId)) {
                         SecurityUtils.setCurrentTenantId(tenantId);
-                        LOGGER.info("SWITCHED TO TENANT: {}", tenantId);
+                        LOGGER.debug("User {} switched to tenant: {}", remoteUser.getDisplayName(), tenantId);
                     }
                 }
             }

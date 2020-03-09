@@ -42,7 +42,7 @@ public class SecurityUtils {
 
 
     /**
-     * Get the tenant id of the current user.
+     * Get the currently used tenant id of the user.
      */
     public static String getCurrentTenantId() {
         if (tenantId == null) {
@@ -56,6 +56,9 @@ public class SecurityUtils {
         return tenantId;
     }
 
+    /**
+     * Set the currently used id tenant of the user.
+     */
     public static void setCurrentTenantId(String id) {
         tenantId = id;
     }

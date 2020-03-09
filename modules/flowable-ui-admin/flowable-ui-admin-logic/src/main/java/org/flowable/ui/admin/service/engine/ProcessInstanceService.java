@@ -70,9 +70,6 @@ public class ProcessInstanceService {
 
     @Autowired
     protected ObjectMapper objectMapper;
-    
-    @Value("${flowable.admin.app.security.tenant-filtering:false}")
-    boolean enableTenantFiltering;
 
     public JsonNode listProcesInstances(ObjectNode bodyNode, ServerConfig serverConfig) {
         JsonNode resultNode = null;

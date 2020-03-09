@@ -336,7 +336,8 @@ flowableModeler
                   
             $rootScope.changeCurrentTenant = function() {
                 $cookies["tenantId"] = $rootScope.account.tenantId;
-                setTimeout(function(){ // $cookies polls every 100ms, quick workaround
+                //Angular 1.3.14 $cookies poll every 100ms
+                setTimeout(function(){
                     $route.reload();
                 }, 105);
             };
