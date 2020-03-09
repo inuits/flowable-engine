@@ -24,6 +24,8 @@ public class SecurityUtils {
 
     private static User assumeUser;
 
+    private static String tenantId;
+
     private SecurityUtils() {
     }
 
@@ -43,11 +45,19 @@ public class SecurityUtils {
      * Get the tenant id of the current user.
      */
     public static String getCurrentTenantId() {
-        User user = getCurrentUserObject();
-        if (user != null) {
-            return user.getTenantId();
+        if (tenantId == null) {
+            User user = getCurrentUserObject();
+            if (user != null) {
+                tenantId = user.getTenantId();
+                return tenantId;
+            }
+            return null;
         }
-        return null;
+        return tenantId;
+    }
+
+    public static void setCurrentTenantId(String id) {
+        tenantId = id;
     }
 
 

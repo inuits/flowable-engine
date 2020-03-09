@@ -77,4 +77,8 @@ public class TenantEntityManagerImpl
     public List<Tenant> findTenantsByUser(String userId) {
         return dataManager.findTenantsByUser(userId);
     }
+
+    protected TenantMembershipEntityManager getTenantMembershipEntityManager() {
+        return engineConfiguration.getTenantMembershipEntityManager();
+    }
 }

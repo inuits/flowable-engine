@@ -78,13 +78,12 @@ public class ProcessInstanceService {
         JsonNode resultNode = null;
         try {
             URIBuilder builder = new URIBuilder("query/historic-process-instances");
-            String tenantId = bodyNode.get("tenantId").toString();
 
             String uri = clientUtil.getUriWithPagingAndOrderParameters(builder, bodyNode);
             HttpPost post = clientUtil.createPost(uri, serverConfig);
 
             post.setEntity(clientUtil.createStringEntity(bodyNode.toString()));
-            resultNode = clientUtil.executeRequest(post, serverConfig, tenantId); 
+            resultNode = clientUtil.executeRequest(post, serverConfig); 
         } catch (Exception e) {
             throw new FlowableServiceException(e.getMessage(), e);
         }

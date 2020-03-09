@@ -14,7 +14,6 @@ package org.flowable.ui.common.tenant;
 
 import org.apache.commons.lang3.StringUtils;
 import org.flowable.ui.common.properties.FlowableCommonAppProperties;
-import org.flowable.ui.common.security.FlowableAppUser;
 import org.flowable.ui.common.security.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

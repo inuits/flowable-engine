@@ -55,9 +55,6 @@ import org.flowable.ui.admin.service.AttachmentResponseInfo;
 import org.flowable.ui.admin.service.ResponseInfo;
 import org.flowable.ui.admin.service.engine.exception.FlowableServiceException;
 import org.flowable.ui.common.security.SecurityUtils;
-import org.flowable.ui.common.service.idm.RemoteIdmService;
-import org.flowable.ui.common.model.RemoteUser;
-import org.flowable.ui.common.model.RemoteTenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,9 +80,6 @@ public class FlowableClientService {
     @Autowired
     protected ObjectMapper objectMapper;
 
-    @Autowired
-    private RemoteIdmService remoteIdmService;
-    
     @Value("${flowable.admin.app.security.tenant-filtering:false}")
     boolean enableTenantFiltering;
 
@@ -135,43 +129,27 @@ public class FlowableClientService {
      * Execute the given request. Will return the parsed JSON present in the response-body, in case the status code is 200 - OK. In case the response returns a different status-code, an
      * {@link FlowableServiceException} is thrown with the error message received from the client, if possible.
      */
-    public JsonNode executeRequest(HttpUriRequest request, ServerConfig serverConfig) {
-        return executeRequest(request, serverConfig, null, HttpStatus.SC_OK);
-    }
-
     public JsonNode executeRequest(HttpUriRequest request, ServerConfig serverConfig, int expectedStatusCode) {
-        return executeRequest(request, serverConfig.getUserName(), serverConfigService.decrypt(serverConfig.getPassword()), null, expectedStatusCode);
+        return executeRequest(request, serverConfig.getUserName(), serverConfigService.decrypt(serverConfig.getPassword()), expectedStatusCode);
     }
     
-    public JsonNode executeRequest(HttpUriRequest request, ServerConfig serverConfig, String tenantId) {
-        return executeRequest(request, serverConfig, tenantId, HttpStatus.SC_OK);
-    }
-
-    public JsonNode executeRequest(HttpUriRequest request, ServerConfig serverConfig, String tenantId, int expectedStatusCode) {
-        return executeRequest(request, serverConfig.getUserName(), serverConfigService.decrypt(serverConfig.getPassword()), tenantId, expectedStatusCode);
+    public JsonNode executeRequest(HttpUriRequest request, ServerConfig serverConfig) {
+        return executeRequest(request, serverConfig, HttpStatus.SC_OK);
     }
 
     public JsonNode executeRequest(HttpUriRequest request, String userName, String password) {
-        return executeRequest(request, userName, password, null, HttpStatus.SC_OK);
+        return executeRequest(request, userName, password, HttpStatus.SC_OK);
     }
 
     /**
      * Execute the given request. Will return the parsed JSON present in the response-body, in case the status code is as expected. In case the response returns a different status-code, an
      * {@link FlowableServiceException} is thrown with the error message received from the client, if possible.
      */
-    public JsonNode executeRequest(HttpUriRequest request, String userName, String password, String tenantId, int expectedStatusCode) {
-
+    public JsonNode executeRequest(HttpUriRequest request, String userName, String password, int expectedStatusCode) {
+        
+        String tenantId = SecurityUtils.getCurrentTenantId();
         if (enableTenantFiltering && tenantId != null && !tenantId.isEmpty()) {
-            // USER object has nog getTenants()
-            RemoteUser remoteUser = remoteIdmService.getUser(SecurityUtils.getCurrentUserId());
-            if (remoteUser.getTenants() != null && remoteUser.getTenants().size() > 0) {
-                for (RemoteTenant remoteTenant : remoteUser.getTenants()) {
-                    if(remoteTenant.getId().equals(tenantId)) {
-                        request.addHeader("x-tenant", tenantId);
-                        LOGGER.info("SWITCHED TO TENANT: {}", tenantId);
-                    }
-                }
-            }
+            request.addHeader("x-tenant", tenantId);
         }
         
         FlowableServiceException exception = null;

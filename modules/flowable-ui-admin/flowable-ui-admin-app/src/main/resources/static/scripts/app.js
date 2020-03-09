@@ -476,12 +476,16 @@ flowableAdminApp
         		$http.get('/app/rest/account')
 		        	.success(function (data, status, headers, config) {
                         $rootScope.account = data;
+                        $cookies["tenantId"] = data.tenantId;
 		               	$rootScope.authenticated = true;
 		               	$rootScope.loadServerConfig(false);
                       });
 
                 $rootScope.changeCurrentTenant = function() {
-                    $route.reload();
+                    $cookies["tenantId"] = $rootScope.account.tenantId;
+                    setTimeout(function(){ // $cookies polls every 100ms, quick workaround
+                        $route.reload();
+                    }, 105);
                 };
 
 	        	$rootScope.loadProcessDefinitionsCache = function() {

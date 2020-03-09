@@ -112,7 +112,8 @@ alter table ACT_ID_PRIV_MAPPING
 alter table ACT_ID_TENANT_MEMBERSHIP
     add constraint ACT_FK_MEMB_TENANT
     foreign key (TENANT_ID_)
-    references ACT_ID_TENANT (ID_);
+    references ACT_ID_TENANT (ID_)
+    ON DELETE CASCADE;
 
 alter table ACT_ID_TENANT_MEMBERSHIP
     add constraint ACT_FK_MEMB_TEN_USER

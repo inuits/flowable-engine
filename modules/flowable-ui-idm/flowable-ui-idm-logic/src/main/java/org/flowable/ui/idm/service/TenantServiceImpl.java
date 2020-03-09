@@ -18,11 +18,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.flowable.idm.api.Tenant;
 import org.flowable.idm.api.TenantQuery;
 import org.flowable.idm.api.User;
+import org.flowable.idm.api.UserQuery;
 import org.flowable.ui.common.service.exception.BadRequestException;
 import org.flowable.ui.common.service.exception.ConflictingRequestException;
 import org.flowable.ui.common.service.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * @author Ruben De Swaef
@@ -31,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class TenantServiceImpl extends AbstractIdmService implements TenantService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TenantServiceImpl.class);
+
     @Override
     public List<Tenant> getTenants(String filter) {
         TenantQuery tenantQuery = identityService.createTenantQuery();
@@ -38,6 +45,11 @@ public class TenantServiceImpl extends AbstractIdmService implements TenantServi
             tenantQuery.tenantNameLikeIgnoreCase("%" + (filter != null ? filter : "") + "%");
         }
         return tenantQuery.orderByTenantName().asc().list();
+    }
+
+    protected UserQuery createUsersForTenantQuery(String tenantId) {
+        UserQuery userQuery = identityService.createUserQuery().memberOfTenant(tenantId);
+        return userQuery;
     }
 
     public Tenant getTenant(String tenantId) {
@@ -58,6 +70,7 @@ public class TenantServiceImpl extends AbstractIdmService implements TenantServi
         if (tenant == null) {
             throw new NotFoundException();
         }
+        
         identityService.deleteTenant(tenantId);
     }
 

@@ -157,8 +157,8 @@ flowableModeler
         .determinePreferredLanguage();
 
   }])
-  .run(['$rootScope', '$timeout', '$modal', '$translate', '$location', '$http', '$window', 'appResourceRoot',
-        function($rootScope, $timeout, $modal, $translate, $location, $http, $window, appResourceRoot) {
+  .run(['$rootScope', '$timeout', '$modal', '$translate', '$location', '$http', '$window', 'appResourceRoot', '$cookies', '$route',
+        function($rootScope, $timeout, $modal, $translate, $location, $http, $window, appResourceRoot, $cookies, $route) {
 
             // set angular translate fallback language
             $translate.fallbackLanguage(['en']);
@@ -328,10 +328,18 @@ flowableModeler
 
             $http.get(FLOWABLE.APP_URL.getAccountUrl())
 	        	.success(function (data, status, headers, config) {
-	              	$rootScope.account = data;
+                    $rootScope.account = data;
+                    $cookies["tenantId"] = data.tenantId;
 	               	$rootScope.invalidCredentials = false;
 	 				$rootScope.authenticated = true;
-	          	});
+                  });
+                  
+            $rootScope.changeCurrentTenant = function() {
+                $cookies["tenantId"] = $rootScope.account.tenantId;
+                setTimeout(function(){ // $cookies polls every 100ms, quick workaround
+                    $route.reload();
+                }, 105);
+            };
 
 	        $rootScope.logout = function () {
                 $rootScope.authenticated = false;

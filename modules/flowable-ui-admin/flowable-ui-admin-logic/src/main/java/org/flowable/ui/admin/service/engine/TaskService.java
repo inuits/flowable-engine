@@ -64,13 +64,12 @@ public class TaskService {
         JsonNode resultNode = null;
         try {
             URIBuilder builder = clientUtil.createUriBuilder(HISTORIC_TASK_QUERY_URL);
-            String tenantId = bodyNode.get("tenantId").toString();
 
             String uri = clientUtil.getUriWithPagingAndOrderParameters(builder, bodyNode);
             HttpPost post = clientUtil.createPost(uri, serverConfig);
 
             post.setEntity(clientUtil.createStringEntity(bodyNode.toString()));
-            resultNode = clientUtil.executeRequest(post, serverConfig, tenantId);
+            resultNode = clientUtil.executeRequest(post, serverConfig);
         } catch (Exception e) {
             throw new FlowableServiceException(e.getMessage(), e);
         }
