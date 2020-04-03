@@ -28,10 +28,12 @@ import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.engine.test.Deployment;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 
 /**
  * @author Joram Barrez
  */
+@DisabledIfSystemProperty(named = "database", matches = "cockroachdb") // Disabled due to having a retry interceptor for CRDB and barriers in this test
 public class OptimisticLockingExceptionTest extends PluggableFlowableTestCase {
 
     @Test
@@ -172,6 +174,15 @@ public class OptimisticLockingExceptionTest extends PluggableFlowableTestCase {
 
         }
 
+        @Override
+        public Integer order() {
+            return 5;
+        }
+        
+        @Override
+        public boolean multipleAllowed() {
+            return false;
+        }
     }
 
 }

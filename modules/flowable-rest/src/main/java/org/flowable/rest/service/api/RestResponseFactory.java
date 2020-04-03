@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
+import org.flowable.batch.api.Batch;
+import org.flowable.batch.api.BatchPart;
 import org.flowable.common.engine.api.FlowableException;
 import org.flowable.common.engine.api.FlowableIllegalArgumentException;
 import org.flowable.common.rest.resolver.ContentTypeResolver;
@@ -27,8 +29,11 @@ import org.flowable.common.rest.util.RestUrlBuilder;
 import org.flowable.common.rest.variable.BooleanRestVariableConverter;
 import org.flowable.common.rest.variable.DateRestVariableConverter;
 import org.flowable.common.rest.variable.DoubleRestVariableConverter;
+import org.flowable.common.rest.variable.InstantRestVariableConverter;
 import org.flowable.common.rest.variable.IntegerRestVariableConverter;
 import org.flowable.common.rest.variable.JsonObjectRestVariableConverter;
+import org.flowable.common.rest.variable.LocalDateRestVariableConverter;
+import org.flowable.common.rest.variable.LocalDateTimeRestVariableConverter;
 import org.flowable.common.rest.variable.LongRestVariableConverter;
 import org.flowable.common.rest.variable.RestVariableConverter;
 import org.flowable.common.rest.variable.ShortRestVariableConverter;
@@ -80,6 +85,8 @@ import org.flowable.rest.service.api.identity.GroupResponse;
 import org.flowable.rest.service.api.identity.MembershipResponse;
 import org.flowable.rest.service.api.identity.UserInfoResponse;
 import org.flowable.rest.service.api.identity.UserResponse;
+import org.flowable.rest.service.api.management.BatchPartResponse;
+import org.flowable.rest.service.api.management.BatchResponse;
 import org.flowable.rest.service.api.management.JobResponse;
 import org.flowable.rest.service.api.management.TableResponse;
 import org.flowable.rest.service.api.repository.DecisionTableResponse;
@@ -562,32 +569,7 @@ public class RestResponseFactory {
     }
 
     public ProcessInstanceResponse createProcessInstanceResponse(ProcessInstance processInstance, RestUrlBuilder urlBuilder) {
-        ProcessInstanceResponse result = new ProcessInstanceResponse();
-        result.setActivityId(processInstance.getActivityId());
-        result.setStartUserId(processInstance.getStartUserId());
-        result.setStartTime(processInstance.getStartTime());
-        result.setBusinessKey(processInstance.getBusinessKey());
-        result.setId(processInstance.getId());
-        result.setName(processInstance.getName());
-        result.setProcessDefinitionId(processInstance.getProcessDefinitionId());
-        result.setProcessDefinitionUrl(urlBuilder.buildUrl(RestUrls.URL_PROCESS_DEFINITION, processInstance.getProcessDefinitionId()));
-        result.setEnded(processInstance.isEnded());
-        result.setSuspended(processInstance.isSuspended());
-        result.setUrl(urlBuilder.buildUrl(RestUrls.URL_PROCESS_INSTANCE, processInstance.getId()));
-        result.setCallbackId(processInstance.getCallbackId());
-        result.setCallbackType(processInstance.getCallbackType());
-        result.setTenantId(processInstance.getTenantId());
-
-        // Added by Ryan Johnston
-        if (processInstance.isEnded()) {
-            // Process complete. Note the same in the result.
-            result.setCompleted(true);
-        } else {
-            // Process not complete. Note the same in the result.
-            result.setCompleted(false);
-        }
-        // End Added by Ryan Johnston
-
+        ProcessInstanceResponse result = internalCreateProcessInstanceResponse(processInstance, urlBuilder);
         if (processInstance.getProcessVariables() != null) {
             Map<String, Object> variableMap = processInstance.getProcessVariables();
             for (String name : variableMap.keySet()) {
@@ -598,34 +580,11 @@ public class RestResponseFactory {
         return result;
     }
 
-    public ProcessInstanceResponse createProcessInstanceResponse(ProcessInstance processInstance, boolean returnVariables, Map<String, Object> runtimeVariableMap,
-            List<HistoricVariableInstance> historicVariableList) {
+    public ProcessInstanceResponse createProcessInstanceResponse(ProcessInstance processInstance, boolean returnVariables,
+            Map<String, Object> runtimeVariableMap, List<HistoricVariableInstance> historicVariableList) {
 
         RestUrlBuilder urlBuilder = createUrlBuilder();
-        ProcessInstanceResponse result = new ProcessInstanceResponse();
-        result.setActivityId(processInstance.getActivityId());
-        result.setStartUserId(processInstance.getStartUserId());
-        result.setStartTime(processInstance.getStartTime());
-        result.setBusinessKey(processInstance.getBusinessKey());
-        result.setId(processInstance.getId());
-        result.setName(processInstance.getName());
-        result.setProcessDefinitionId(processInstance.getProcessDefinitionId());
-        result.setProcessDefinitionUrl(urlBuilder.buildUrl(RestUrls.URL_PROCESS_DEFINITION, processInstance.getProcessDefinitionId()));
-        result.setEnded(processInstance.isEnded());
-        result.setSuspended(processInstance.isSuspended());
-        result.setUrl(urlBuilder.buildUrl(RestUrls.URL_PROCESS_INSTANCE, processInstance.getId()));
-        result.setCallbackId(processInstance.getCallbackId());
-        result.setCallbackType(processInstance.getCallbackType());
-        result.setTenantId(processInstance.getTenantId());
-
-        // Added by Ryan Johnston
-        if (processInstance.isEnded()) {
-            // Process complete. Note the same in the result.
-            result.setCompleted(true);
-        } else {
-            // Process not complete. Note the same in the result.
-            result.setCompleted(false);
-        }
+        ProcessInstanceResponse result = internalCreateProcessInstanceResponse(processInstance, urlBuilder);
 
         if (returnVariables) {
 
@@ -645,8 +604,33 @@ public class RestResponseFactory {
                 }
             }
         }
-        // End Added by Ryan Johnston
+        return result;
+    }
 
+    protected ProcessInstanceResponse internalCreateProcessInstanceResponse(ProcessInstance processInstance, RestUrlBuilder urlBuilder) {
+        ProcessInstanceResponse result = new ProcessInstanceResponse();
+        result.setActivityId(processInstance.getActivityId());
+        result.setStartUserId(processInstance.getStartUserId());
+        result.setStartTime(processInstance.getStartTime());
+        result.setBusinessKey(processInstance.getBusinessKey());
+        result.setId(processInstance.getId());
+        result.setName(processInstance.getName());
+        result.setProcessDefinitionId(processInstance.getProcessDefinitionId());
+        result.setProcessDefinitionUrl(urlBuilder.buildUrl(RestUrls.URL_PROCESS_DEFINITION, processInstance.getProcessDefinitionId()));
+        result.setEnded(processInstance.isEnded());
+        result.setSuspended(processInstance.isSuspended());
+        result.setUrl(urlBuilder.buildUrl(RestUrls.URL_PROCESS_INSTANCE, processInstance.getId()));
+        result.setCallbackId(processInstance.getCallbackId());
+        result.setCallbackType(processInstance.getCallbackType());
+        result.setReferenceId(processInstance.getReferenceId());
+        result.setReferenceType(processInstance.getReferenceType());
+        result.setTenantId(processInstance.getTenantId());
+
+        if (processInstance.isEnded()) {
+            result.setCompleted(true);
+        } else {
+            result.setCompleted(false);
+        }
         return result;
     }
 
@@ -776,6 +760,8 @@ public class RestResponseFactory {
         }
         result.setCallbackId(processInstance.getCallbackId());
         result.setCallbackType(processInstance.getCallbackType());
+        result.setReferenceId(processInstance.getReferenceId());
+        result.setReferenceType(processInstance.getReferenceType());
         result.setTenantId(processInstance.getTenantId());
         return result;
     }
@@ -1040,6 +1026,8 @@ public class RestResponseFactory {
         response.setExecutionId(job.getExecutionId());
         response.setProcessDefinitionId(job.getProcessDefinitionId());
         response.setProcessInstanceId(job.getProcessInstanceId());
+        response.setElementId(job.getElementId());
+        response.setElementName(job.getElementName());
         response.setRetries(job.getRetries());
         response.setCreateTime(job.getCreateTime());
         response.setTenantId(job.getTenantId());
@@ -1057,6 +1045,69 @@ public class RestResponseFactory {
         if (job.getExecutionId() != null) {
             response.setExecutionUrl(urlBuilder.buildUrl(RestUrls.URL_EXECUTION, job.getExecutionId()));
         }
+
+        return response;
+    }
+    
+    public List<BatchResponse> createBatchResponse(List<Batch> batches) {
+        RestUrlBuilder urlBuilder = createUrlBuilder();
+        List<BatchResponse> responseList = new ArrayList<>();
+        for (Batch instance : batches) {
+            responseList.add(createBatchResponse(instance, urlBuilder));
+        }
+        return responseList;
+    }
+
+    public BatchResponse createBatchResponse(Batch batch) {
+        return createBatchResponse(batch, createUrlBuilder());
+    }
+
+    public BatchResponse createBatchResponse(Batch batch, RestUrlBuilder urlBuilder) {
+        BatchResponse response = new BatchResponse();
+        response.setId(batch.getId());
+        response.setBatchType(batch.getBatchType());
+        response.setSearchKey(batch.getBatchSearchKey());
+        response.setSearchKey2(batch.getBatchSearchKey2());
+        response.setCreateTime(batch.getCreateTime());
+        response.setCompleteTime(batch.getCompleteTime());
+        response.setStatus(batch.getStatus());
+        response.setTenantId(batch.getTenantId());
+
+        response.setUrl(urlBuilder.buildUrl(RestUrls.URL_BATCH, batch.getId()));
+
+        return response;
+    }
+    
+    public List<BatchPartResponse> createBatchPartResponse(List<BatchPart> batchParts) {
+        RestUrlBuilder urlBuilder = createUrlBuilder();
+        List<BatchPartResponse> responseList = new ArrayList<>();
+        for (BatchPart instance : batchParts) {
+            responseList.add(createBatchPartResponse(instance, urlBuilder));
+        }
+        return responseList;
+    }
+
+    public BatchPartResponse createBatchPartResponse(BatchPart batchPart) {
+        return createBatchPartResponse(batchPart, createUrlBuilder());
+    }
+
+    public BatchPartResponse createBatchPartResponse(BatchPart batchPart, RestUrlBuilder urlBuilder) {
+        BatchPartResponse response = new BatchPartResponse();
+        response.setId(batchPart.getId());
+        response.setBatchId(batchPart.getBatchId());
+        response.setBatchType(batchPart.getBatchType());
+        response.setSearchKey(batchPart.getBatchSearchKey());
+        response.setSearchKey2(batchPart.getBatchSearchKey2());
+        response.setScopeId(batchPart.getScopeId());
+        response.setSubScopeId(batchPart.getSubScopeId());
+        response.setScopeType(batchPart.getScopeType());
+        response.setCreateTime(batchPart.getCreateTime());
+        response.setCompleteTime(batchPart.getCompleteTime());
+        response.setStatus(batchPart.getStatus());
+        response.setTenantId(batchPart.getTenantId());
+
+        response.setUrl(urlBuilder.buildUrl(RestUrls.URL_BATCH_PART, batchPart.getId()));
+        response.setBatchUrl(urlBuilder.buildUrl(RestUrls.URL_BATCH, batchPart.getBatchId()));
 
         return response;
     }
@@ -1084,6 +1135,10 @@ public class RestResponseFactory {
         response.setExecutionId(eventSubscription.getExecutionId());
         response.setProcessDefinitionId(eventSubscription.getProcessDefinitionId());
         response.setProcessInstanceId(eventSubscription.getProcessInstanceId());
+        response.setScopeId(eventSubscription.getScopeId());
+        response.setScopeType(eventSubscription.getScopeType());
+        response.setSubScopeId(eventSubscription.getSubScopeId());
+        response.setScopeDefinitionId(eventSubscription.getScopeDefinitionId());
         response.setConfiguration(eventSubscription.getConfiguration());
         response.setTenantId(eventSubscription.getTenantId());
 
@@ -1298,6 +1353,9 @@ public class RestResponseFactory {
         variableConverters.add(new DoubleRestVariableConverter());
         variableConverters.add(new BooleanRestVariableConverter());
         variableConverters.add(new DateRestVariableConverter());
+        variableConverters.add(new InstantRestVariableConverter());
+        variableConverters.add(new LocalDateRestVariableConverter());
+        variableConverters.add(new LocalDateTimeRestVariableConverter());
         variableConverters.add(new JsonObjectRestVariableConverter(objectMapper));
     }
 

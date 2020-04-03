@@ -48,16 +48,17 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class TaskHelper {
 
     public static void insertTask(TaskEntity taskEntity, boolean fireCreateEvent) {
+        CommandContextUtil.getTaskService().insertTask(taskEntity, fireCreateEvent);
+
         if (taskEntity.getOwner() != null) {
             addOwnerIdentityLink(taskEntity);
         }
+
         if (taskEntity.getAssignee() != null) {
             addAssigneeIdentityLinks(taskEntity);
             CommandContextUtil.getCmmnEngineConfiguration().getListenerNotificationHelper().executeTaskListeners(taskEntity, TaskListener.EVENTNAME_ASSIGNMENT);
         }
 
-        CommandContextUtil.getTaskService().insertTask(taskEntity, fireCreateEvent);
-        CommandContextUtil.getCmmnHistoryManager().recordTaskCreated(taskEntity);
     }
 
     public static void deleteTask(String taskId, String deleteReason, boolean cascade) {
@@ -153,11 +154,17 @@ public class TaskHelper {
     }
     
     protected static void addAssigneeIdentityLinks(TaskEntity taskEntity) {
-        CommandContextUtil.getInternalTaskAssignmentManager().addUserIdentityLinkToParent(taskEntity, taskEntity.getAssignee());
+        CmmnEngineConfiguration cmmnEngineConfiguration = CommandContextUtil.getCmmnEngineConfiguration();
+        if (cmmnEngineConfiguration.getIdentityLinkInterceptor() != null) {
+            cmmnEngineConfiguration.getIdentityLinkInterceptor().handleAddAssigneeIdentityLinkToTask(taskEntity, taskEntity.getAssignee());
+        }
     }
 
     protected static void addOwnerIdentityLink(TaskEntity taskEntity) {
-        CommandContextUtil.getInternalTaskAssignmentManager().addUserIdentityLinkToParent(taskEntity, taskEntity.getOwner());
+        CmmnEngineConfiguration cmmnEngineConfiguration = CommandContextUtil.getCmmnEngineConfiguration();
+        if (cmmnEngineConfiguration.getIdentityLinkInterceptor() != null) {
+            cmmnEngineConfiguration.getIdentityLinkInterceptor().handleAddOwnerIdentityLinkToTask(taskEntity, taskEntity.getOwner());
+        }
     }
 
     public static void deleteHistoricTask(String taskId) {

@@ -49,6 +49,9 @@ import org.flowable.dmn.api.DmnRuleService;
 import org.flowable.entitylink.api.EntityLinkService;
 import org.flowable.entitylink.api.history.HistoricEntityLinkService;
 import org.flowable.entitylink.service.EntityLinkServiceConfiguration;
+import org.flowable.eventregistry.api.EventRegistry;
+import org.flowable.eventregistry.api.EventRepositoryService;
+import org.flowable.eventregistry.impl.EventRegistryEngineConfiguration;
 import org.flowable.eventsubscription.service.EventSubscriptionService;
 import org.flowable.eventsubscription.service.EventSubscriptionServiceConfiguration;
 import org.flowable.form.api.FormEngineConfigurationApi;
@@ -60,6 +63,9 @@ import org.flowable.identitylink.service.IdentityLinkService;
 import org.flowable.identitylink.service.IdentityLinkServiceConfiguration;
 import org.flowable.idm.api.IdmEngineConfigurationApi;
 import org.flowable.idm.api.IdmIdentityService;
+import org.flowable.job.service.JobService;
+import org.flowable.job.service.JobServiceConfiguration;
+import org.flowable.job.service.TimerJobService;
 import org.flowable.task.service.HistoricTaskService;
 import org.flowable.task.service.InternalTaskAssignmentManager;
 import org.flowable.task.service.TaskService;
@@ -334,6 +340,40 @@ public class CommandContextUtil {
         return identityService;
     }
     
+    // EVENT REGISTRY
+    
+    public static EventRegistryEngineConfiguration getEventRegistryEngineConfiguration() {
+        return getEventRegistryEngineConfiguration(getCommandContext());
+    }
+    
+    public static EventRegistryEngineConfiguration getEventRegistryEngineConfiguration(CommandContext commandContext) {
+        return (EventRegistryEngineConfiguration) commandContext.getEngineConfigurations().get(EngineConfigurationConstants.KEY_EVENT_REGISTRY_CONFIG);
+    }
+    
+    public static EventRegistry getEventRegistry() {
+        EventRegistry eventRegistry = null;
+        EventRegistryEngineConfiguration eventRegistryEngineConfiguration = getEventRegistryEngineConfiguration();
+        if (eventRegistryEngineConfiguration != null) {
+            eventRegistry = eventRegistryEngineConfiguration.getEventRegistry();
+        }
+
+        return eventRegistry;
+    }
+    
+    public static EventRepositoryService getEventRepositoryService() {
+        return getEventRepositoryService(getCommandContext());
+    }
+    
+    public static EventRepositoryService getEventRepositoryService(CommandContext commandContext) {
+        EventRepositoryService eventRepositoryService = null;
+        EventRegistryEngineConfiguration eventRegistryEngineConfiguration = getEventRegistryEngineConfiguration(commandContext);
+        if (eventRegistryEngineConfiguration != null) {
+            eventRepositoryService = eventRegistryEngineConfiguration.getEventRepositoryService();
+        }
+
+        return eventRepositoryService;
+    }
+    
     // IDENTITY LINK SERVICE
 
     public static IdentityLinkServiceConfiguration getIdentityLinkServiceConfiguration() {
@@ -377,11 +417,23 @@ public class CommandContextUtil {
     }
 
     public static EntityLinkService getEntityLinkService(CommandContext commandContext) {
-        return getEntityLinkServiceConfiguration(commandContext).getEntityLinkService();
+        EntityLinkService entityLinkService = null;
+        EntityLinkServiceConfiguration entityLinkServiceConfiguration = getEntityLinkServiceConfiguration(commandContext);
+        if (entityLinkServiceConfiguration != null) {
+            entityLinkService = entityLinkServiceConfiguration.getEntityLinkService();
+        }
+
+        return entityLinkService;
     }
     
     public static HistoricEntityLinkService getHistoricEntityLinkService() {
-        return getHistoricEntityLinkService(getCommandContext());
+        HistoricEntityLinkService historicEntityLinkService = null;
+        EntityLinkServiceConfiguration entityLinkServiceConfiguration = getEntityLinkServiceConfiguration();
+        if (entityLinkServiceConfiguration != null) {
+            historicEntityLinkService = entityLinkServiceConfiguration.getHistoricEntityLinkService();
+        }
+
+        return historicEntityLinkService;
     }
 
     public static HistoricEntityLinkService getHistoricEntityLinkService(CommandContext commandContext) {
@@ -443,6 +495,33 @@ public class CommandContextUtil {
     public static TaskServiceConfiguration getTaskServiceConfiguration(CommandContext commandContext) {
         return (TaskServiceConfiguration) commandContext.getCurrentEngineConfiguration().getServiceConfigurations()
                         .get(EngineConfigurationConstants.KEY_TASK_SERVICE_CONFIG);
+    }
+    
+    // JOB SERVICE
+    
+    public static JobService getJobService() {
+        return getJobService(getCommandContext());
+    }
+
+    public static JobService getJobService(CommandContext commandContext) {
+        return getJobServiceConfiguration(commandContext).getJobService();
+    }
+    
+    public static TimerJobService getTimerJobService() {
+        return getTimerJobService(getCommandContext());
+    }
+
+    public static TimerJobService getTimerJobService(CommandContext commandContext) {
+        return getJobServiceConfiguration(commandContext).getTimerJobService();
+    }
+    
+    public static JobServiceConfiguration getJobServiceConfiguration() {
+        return getJobServiceConfiguration(getCommandContext());
+    }
+
+    public static JobServiceConfiguration getJobServiceConfiguration(CommandContext commandContext) {
+        return (JobServiceConfiguration) commandContext.getCurrentEngineConfiguration().getServiceConfigurations()
+                        .get(EngineConfigurationConstants.KEY_JOB_SERVICE_CONFIG);
     }
 
     public static CmmnEngineAgenda getAgenda() {

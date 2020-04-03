@@ -14,6 +14,7 @@
 package org.flowable.engine.test.api.runtime.migration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,11 +28,9 @@ import org.flowable.engine.impl.migration.ProcessInstanceMigrationDocumentImpl;
 import org.flowable.engine.impl.test.AbstractTestCase;
 import org.flowable.engine.migration.ActivityMigrationMapping;
 import org.flowable.engine.migration.ProcessInstanceMigrationDocument;
+import org.flowable.engine.migration.Script;
 import org.junit.jupiter.api.Test;
 
-/**
- * @author Dennis Federico
- */
 public class ProcessInstanceMigrationDocumentTest extends AbstractTestCase {
 
     @Test
@@ -95,7 +94,7 @@ public class ProcessInstanceMigrationDocumentTest extends AbstractTestCase {
 
         String jsonAsStr = IoUtil.readFileAsString("org/flowable/engine/test/api/runtime/migration/completeProcessInstanceMigrationDocument.json");
 
-        ProcessInstanceMigrationDocument migrationDocument = ProcessInstanceMigrationDocumentImpl.fromProcessInstanceMigrationDocumentJson(jsonAsStr);
+        ProcessInstanceMigrationDocument migrationDocument = ProcessInstanceMigrationDocumentImpl.fromJson(jsonAsStr);
         assertEquals(definitionId, migrationDocument.getMigrateToProcessDefinitionId());
         assertEquals(definitionKey, migrationDocument.getMigrateToProcessDefinitionKey());
         assertEquals(definitionVer, migrationDocument.getMigrateToProcessDefinitionVersion());
@@ -103,6 +102,8 @@ public class ProcessInstanceMigrationDocumentTest extends AbstractTestCase {
         assertThat(migrationDocument.getActivityMigrationMappings()).usingFieldByFieldElementComparator().containsExactly(oneToOneMapping, oneToManyMapping, manyToOneMapping);
         assertThat(migrationDocument.getActivitiesLocalVariables()).isEqualTo(activityLocalVariables);
         assertThat(migrationDocument.getProcessInstanceVariables()).isEqualTo(processInstanceVariables);
+        assertThat(migrationDocument.getPreUpgradeScript()).isEqualToComparingFieldByField(new Script("groovy", "1+1"));
+        assertThat(migrationDocument.getPostUpgradeScript()).isEqualToComparingFieldByField(new Script("groovy", "2+2"));
     }
 
     @Test
@@ -176,6 +177,8 @@ public class ProcessInstanceMigrationDocumentTest extends AbstractTestCase {
 
         ProcessInstanceMigrationDocument document = new ProcessInstanceMigrationBuilderImpl(null)
             .migrateToProcessDefinition(definitionId)
+            .preUpgradeScript(new Script("groovy", "1+1"))
+            .postUpgradeScript(new Script("groovy", "2+2"))
             .addActivityMigrationMapping(oneToOneMapping)
             .addActivityMigrationMapping(oneToManyMapping)
             .addActivityMigrationMapping(manyToOneMapping)
@@ -187,7 +190,7 @@ public class ProcessInstanceMigrationDocumentTest extends AbstractTestCase {
         String serializedDocument = document.asJsonString();
 
         //DeSerialize the document
-        ProcessInstanceMigrationDocument migrationDocument = ProcessInstanceMigrationDocumentImpl.fromProcessInstanceMigrationDocumentJson(serializedDocument);
+        ProcessInstanceMigrationDocument migrationDocument = ProcessInstanceMigrationDocumentImpl.fromJson(serializedDocument);
 
         assertEquals(definitionId, migrationDocument.getMigrateToProcessDefinitionId());
         assertNull(migrationDocument.getMigrateToProcessDefinitionKey());
@@ -196,6 +199,100 @@ public class ProcessInstanceMigrationDocumentTest extends AbstractTestCase {
         assertThat(migrationDocument.getActivityMigrationMappings()).usingFieldByFieldElementComparator().containsAnyOf(oneToOneMapping, oneToManyMapping, manyToOneMapping);
         assertThat(migrationDocument.getActivitiesLocalVariables()).isEqualTo(activityLocalVariables);
         assertThat(migrationDocument.getProcessInstanceVariables()).isEqualTo(processInstanceVariables);
+        assertThat(migrationDocument.getPreUpgradeScript().getLanguage()).isEqualTo("groovy");
+        assertThat(migrationDocument.getPreUpgradeScript().getScript()).isEqualTo("1+1");
+        assertThat(migrationDocument.getPostUpgradeScript().getLanguage()).isEqualTo("groovy");
+        assertThat(migrationDocument.getPostUpgradeScript().getScript()).isEqualTo("2+2");
+    }
+
+    @Test
+    public void preUpgradeJavaDelegateSerialization() {
+        String definitionId = "someProcessId";
+
+        ProcessInstanceMigrationDocument document = new ProcessInstanceMigrationBuilderImpl(null)
+            .migrateToProcessDefinition(definitionId)
+            .preUpgradeJavaDelegate("new javadelegate")
+            .postUpgradeJavaDelegate("new post javadelegate")
+            .getProcessInstanceMigrationDocument();
+
+        //Serialize the document as Json
+        String serializedDocument = document.asJsonString();
+
+        //DeSerialize the document
+        ProcessInstanceMigrationDocument migrationDocument = ProcessInstanceMigrationDocumentImpl.fromJson(serializedDocument);
+
+        assertEquals(definitionId, migrationDocument.getMigrateToProcessDefinitionId());
+        assertThat(migrationDocument.getPreUpgradeJavaDelegate()).isEqualTo("new javadelegate");
+        assertThat(migrationDocument.getPostUpgradeJavaDelegate()).isEqualTo("new post javadelegate");
+    }
+
+    @Test
+    public void preUpgradeJavaDelegateExpressionSerialization() {
+        String definitionId = "someProcessId";
+
+        ProcessInstanceMigrationDocument document = new ProcessInstanceMigrationBuilderImpl(null)
+            .migrateToProcessDefinition(definitionId)
+            .preUpgradeJavaDelegateExpression("new expression")
+            .postUpgradeJavaDelegateExpression("new post expression")
+            .getProcessInstanceMigrationDocument();
+
+        //Serialize the document as Json
+        String serializedDocument = document.asJsonString();
+
+        //DeSerialize the document
+        ProcessInstanceMigrationDocument migrationDocument = ProcessInstanceMigrationDocumentImpl.fromJson(serializedDocument);
+
+        assertEquals(definitionId, migrationDocument.getMigrateToProcessDefinitionId());
+        assertThat(migrationDocument.getPreUpgradeJavaDelegateExpression()).isEqualTo("new expression");
+        assertThat(migrationDocument.getPostUpgradeJavaDelegateExpression()).isEqualTo("new post expression");
+    }
+
+    @Test
+    void preUpgradeAllowsOneTaskOnly_ScriptExpression() {
+        assertThatThrownBy(() -> new ProcessInstanceMigrationBuilderImpl(null)
+            .migrateToProcessDefinition("testProcessDefinition")
+            .preUpgradeScript(new Script("groovy", "1+1"))
+            .preUpgradeJavaDelegateExpression("new Expression()")
+            .getProcessInstanceMigrationDocument()
+        ).
+            isInstanceOf(IllegalArgumentException.class).
+            hasMessage("Pre upgrade expression can't be set when another pre-upgrade task was already specified.");
+    }
+
+    @Test
+    void postUpgradeAllowsOneTaskOnly_ScriptExpression() {
+        assertThatThrownBy(() -> new ProcessInstanceMigrationBuilderImpl(null)
+            .migrateToProcessDefinition("testProcessDefinition")
+            .postUpgradeScript(new Script("groovy", "1+1"))
+            .postUpgradeJavaDelegateExpression("new Expression()")
+            .getProcessInstanceMigrationDocument()
+        ).
+            isInstanceOf(IllegalArgumentException.class).
+            hasMessage("Post upgrade expression can't be set when another post-upgrade task was already specified.");
+    }
+
+    @Test
+    void preUpgradeAllowsOneTaskOnly_ExpressionJavaDelegate() {
+        assertThatThrownBy(() -> new ProcessInstanceMigrationBuilderImpl(null)
+            .migrateToProcessDefinition("testProcessDefinition")
+            .preUpgradeScript(new Script("groovy", "1+1"))
+            .preUpgradeJavaDelegate("JavaDelegate")
+            .getProcessInstanceMigrationDocument()
+        ).
+            isInstanceOf(IllegalArgumentException.class).
+            hasMessage("Pre upgrade java delegate can't be set when another pre-upgrade task was already specified.");
+    }
+
+    @Test
+    void postUpgradeAllowsOneTaskOnly_ExpressionJavaDelegate() {
+        assertThatThrownBy(() -> new ProcessInstanceMigrationBuilderImpl(null)
+            .migrateToProcessDefinition("testProcessDefinition")
+            .postUpgradeScript(new Script("groovy", "1+1"))
+            .postUpgradeJavaDelegate("JavaDelegate")
+            .getProcessInstanceMigrationDocument()
+        ).
+            isInstanceOf(IllegalArgumentException.class).
+            hasMessage("Post upgrade java delegate can't be set when another post-upgrade task was already specified.");
     }
 
     @Test
@@ -224,7 +321,7 @@ public class ProcessInstanceMigrationDocumentTest extends AbstractTestCase {
         String jsonAsStr = IoUtil.readFileAsString("org/flowable/engine/test/api/runtime/migration/duplicatedFromActivitiesInFromMappingMigrationDocument.json");
 
         try {
-            ProcessInstanceMigrationDocumentImpl.fromProcessInstanceMigrationDocumentJson(jsonAsStr);
+            ProcessInstanceMigrationDocumentImpl.fromJson(jsonAsStr);
             fail("Should not allow duplicated values in 'from' activity");
         } catch (FlowableException e) {
             assertTextPresent("From activity '[originalActivity1, originalActivity2]' is mapped more than once", e.getMessage());
@@ -252,7 +349,7 @@ public class ProcessInstanceMigrationDocumentTest extends AbstractTestCase {
         String serializedDocument = document.asJsonString();
 
         //DeSerialize the document
-        ProcessInstanceMigrationDocument migrationDocument = ProcessInstanceMigrationDocumentImpl.fromProcessInstanceMigrationDocumentJson(serializedDocument);
+        ProcessInstanceMigrationDocument migrationDocument = ProcessInstanceMigrationDocumentImpl.fromJson(serializedDocument);
 
         assertNull(migrationDocument.getMigrateToProcessDefinitionId());
         assertEquals(definitionKey, migrationDocument.getMigrateToProcessDefinitionKey());
@@ -294,7 +391,7 @@ public class ProcessInstanceMigrationDocumentTest extends AbstractTestCase {
         String serializedDocument = document.asJsonString();
 
         //DeSerialize the document
-        ProcessInstanceMigrationDocument migrationDocument = ProcessInstanceMigrationDocumentImpl.fromProcessInstanceMigrationDocumentJson(serializedDocument);
+        ProcessInstanceMigrationDocument migrationDocument = ProcessInstanceMigrationDocumentImpl.fromJson(serializedDocument);
 
         assertNull(migrationDocument.getMigrateToProcessDefinitionId());
         assertEquals(definitionKey, migrationDocument.getMigrateToProcessDefinitionKey());
@@ -377,7 +474,7 @@ public class ProcessInstanceMigrationDocumentTest extends AbstractTestCase {
 
         String jsonAsStr = IoUtil.readFileAsString("org/flowable/engine/test/api/runtime/migration/withCallActivityProcessInstanceMigrationDocument.json");
 
-        ProcessInstanceMigrationDocument migrationDocument = ProcessInstanceMigrationDocumentImpl.fromProcessInstanceMigrationDocumentJson(jsonAsStr);
+        ProcessInstanceMigrationDocument migrationDocument = ProcessInstanceMigrationDocumentImpl.fromJson(jsonAsStr);
         assertEquals(definitionId, migrationDocument.getMigrateToProcessDefinitionId());
         assertEquals(definitionKey, migrationDocument.getMigrateToProcessDefinitionKey());
         assertEquals(definitionVer, migrationDocument.getMigrateToProcessDefinitionVersion());

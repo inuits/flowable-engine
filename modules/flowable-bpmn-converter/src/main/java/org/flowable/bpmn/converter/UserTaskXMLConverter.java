@@ -45,6 +45,7 @@ public class UserTaskXMLConverter extends BaseBpmnXMLConverter {
     /** default attributes taken from bpmn spec and from extension namespace */
     protected static final List<ExtensionAttribute> defaultUserTaskAttributes = Arrays.asList(
             new ExtensionAttribute(ATTRIBUTE_FORM_FORMKEY),
+            new ExtensionAttribute(ATTRIBUTE_SAME_DEPLOYMENT),
             new ExtensionAttribute(ATTRIBUTE_TASK_USER_DUEDATE),
             new ExtensionAttribute(ATTRIBUTE_TASK_USER_BUSINESS_CALENDAR_NAME),
             new ExtensionAttribute(ATTRIBUTE_TASK_USER_ASSIGNEE),
@@ -53,6 +54,7 @@ public class UserTaskXMLConverter extends BaseBpmnXMLConverter {
             new ExtensionAttribute(ATTRIBUTE_TASK_USER_CANDIDATEUSERS),
             new ExtensionAttribute(ATTRIBUTE_TASK_USER_CANDIDATEGROUPS),
             new ExtensionAttribute(ATTRIBUTE_TASK_USER_CATEGORY),
+            new ExtensionAttribute(ATTRIBUTE_FORM_FIELD_VALIDATION),
             new ExtensionAttribute(ATTRIBUTE_TASK_SERVICE_EXTENSIONID),
             new ExtensionAttribute(ATTRIBUTE_TASK_USER_SKIP_EXPRESSION));
 
@@ -99,6 +101,11 @@ public class UserTaskXMLConverter extends BaseBpmnXMLConverter {
         userTask.setOwner(BpmnXMLUtil.getAttributeValue(ATTRIBUTE_TASK_USER_OWNER, xtr));
         userTask.setPriority(BpmnXMLUtil.getAttributeValue(ATTRIBUTE_TASK_USER_PRIORITY, xtr));
 
+        String sameDeploymentAttribute = BpmnXMLUtil.getAttributeValue(ATTRIBUTE_SAME_DEPLOYMENT, xtr);
+        if (ATTRIBUTE_VALUE_FALSE.equalsIgnoreCase(sameDeploymentAttribute)) {
+            userTask.setSameDeployment(false);
+        }
+
         if (StringUtils.isNotEmpty(BpmnXMLUtil.getAttributeValue(ATTRIBUTE_TASK_USER_CANDIDATEUSERS, xtr))) {
             String expression = BpmnXMLUtil.getAttributeValue(ATTRIBUTE_TASK_USER_CANDIDATEUSERS, xtr);
             userTask.getCandidateUsers().addAll(parseDelimitedList(expression));
@@ -136,6 +143,10 @@ public class UserTaskXMLConverter extends BaseBpmnXMLConverter {
         writeQualifiedAttribute(ATTRIBUTE_TASK_USER_BUSINESS_CALENDAR_NAME, userTask.getBusinessCalendarName(), xtw);
         writeQualifiedAttribute(ATTRIBUTE_TASK_USER_CATEGORY, userTask.getCategory(), xtw);
         writeQualifiedAttribute(ATTRIBUTE_FORM_FORMKEY, userTask.getFormKey(), xtw);
+        if (!userTask.isSameDeployment()) {
+            // default value is true
+            writeQualifiedAttribute(ATTRIBUTE_SAME_DEPLOYMENT, "false", xtw);
+        }
         writeQualifiedAttribute(ATTRIBUTE_FORM_FIELD_VALIDATION, userTask.getValidateFormFields(), xtw);
         if (userTask.getPriority() != null) {
             writeQualifiedAttribute(ATTRIBUTE_TASK_USER_PRIORITY, userTask.getPriority(), xtw);

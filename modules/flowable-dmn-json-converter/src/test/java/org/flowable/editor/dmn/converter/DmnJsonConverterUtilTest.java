@@ -17,6 +17,7 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import org.apache.commons.io.IOUtils;
@@ -34,7 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class DmnJsonConverterUtilTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DmnJsonConverterTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DmnJsonConverterUtilTest.class);
 
     private static final String JSON_RESOURCE_1 = "org/flowable/editor/dmn/converter/decisiontable_regression_model_v2.json";
 
@@ -68,7 +69,7 @@ public class DmnJsonConverterUtilTest {
     /* Helper methods */
     protected String readJsonToString(String resource) {
         try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(resource)) {
-            return IOUtils.toString(is);
+            return IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (IOException e) {
             fail("Could not read " + resource + " : " + e.getMessage());
             return null;

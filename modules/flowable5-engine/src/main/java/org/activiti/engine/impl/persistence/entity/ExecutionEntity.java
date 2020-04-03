@@ -1187,8 +1187,7 @@ public class ExecutionEntity extends VariableScopeImpl implements ActivityExecut
 
         // update the related tasks
 
-        List<TaskEntity> allTasks = new ArrayList<>();
-        allTasks.addAll(getTasks());
+        List<TaskEntity> allTasks = new ArrayList<>(getTasks());
 
         List<TaskEntity> cachedTasks = dbSqlSession.findInCache(TaskEntity.class);
         for (TaskEntity cachedTask : cachedTasks) {
@@ -1922,6 +1921,11 @@ public class ExecutionEntity extends VariableScopeImpl implements ActivityExecut
     @Override
     public void setMultiInstanceRoot(boolean isMultiInstanceRoot) {
 
+    }
+
+    @Override
+    public String getPropagatedStageInstanceId() {
+        return null;
     }
 
     protected void callJobProcessors(JobProcessorContext.Phase processorType, AbstractJobEntity abstractJobEntity, ProcessEngineConfigurationImpl processEngineConfiguration) {

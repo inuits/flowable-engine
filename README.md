@@ -37,7 +37,7 @@ The distribution contains most of the sources as jar files. The source code of F
 
 ### JDK 8+
 
-Flowable runs on a JDK higher than or equal to version 8. Go to https://www.oracle.com/technetwork/java/javase/downloads/index.html and click on button "Download JDK".  There are installation instructions on that page as well. To verify that your installation was successful, run "java -version" on the command line.  That should print the installed version of your JDK.
+Flowable runs on a JDK higher than or equal to version 8. Use the JDK packaged with your Linux distribution or go to https://adoptopenjdk.net and click on button "Latest release". There are installation instructions on that page as well. To verify that your installation was successful, run "java -version" on the command line.  That should print the installed version of your JDK.
 
 ### Contributing
 
@@ -48,7 +48,3 @@ Contributing to Flowable: https://github.com/flowable/flowable-engine/wiki.
 Every self-respecting developer should have read this link on how to ask smart questions: http://www.catb.org/~esr/faqs/smart-questions.html.
 
 After you've done that you can post questions and comments on https://forum.flowable.org and create issues in https://github.com/flowable/flowable-engine/issues.
-
-### QA server
-
-There's a Jenkins server running the Flowable unit tests on http://qa.flowable.org.

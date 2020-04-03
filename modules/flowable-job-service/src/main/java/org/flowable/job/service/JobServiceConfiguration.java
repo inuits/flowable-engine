@@ -67,8 +67,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class JobServiceConfiguration extends AbstractServiceConfiguration {
 
-    public static String JOB_EXECUTION_SCOPE_ALL = "all";
-    public static String JOB_EXECUTION_SCOPE_CMMN = "cmmn";
+    public static final String JOB_EXECUTION_SCOPE_ALL = "all";
+    public static final String JOB_EXECUTION_SCOPE_CMMN = "cmmn";
 
     // SERVICES
     // /////////////////////////////////////////////////////////////////
@@ -130,6 +130,10 @@ public class JobServiceConfiguration extends AbstractServiceConfiguration {
     protected boolean asyncHistoryJsonGroupingEnabled;
     protected boolean asyncHistoryExecutorMessageQueueMode;
     protected int asyncHistoryJsonGroupingThreshold = 10;
+    
+    public JobServiceConfiguration(String engineName) {
+        super(engineName);
+    }
 
     // init
     // /////////////////////////////////////////////////////////////////////

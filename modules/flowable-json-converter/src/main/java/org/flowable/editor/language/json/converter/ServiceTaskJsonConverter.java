@@ -20,6 +20,7 @@ import org.flowable.bpmn.model.FieldExtension;
 import org.flowable.bpmn.model.FlowElement;
 import org.flowable.bpmn.model.HttpServiceTask;
 import org.flowable.bpmn.model.ImplementationType;
+import org.flowable.bpmn.model.MapExceptionEntry;
 import org.flowable.bpmn.model.ServiceTask;
 import org.flowable.editor.language.json.model.ModelInfo;
 
@@ -69,6 +70,8 @@ public class ServiceTaskJsonConverter extends BaseBpmnJsonConverter implements D
             setPropertyFieldValue(PROPERTY_MAILTASK_BCC, serviceTask, propertiesNode);
             setPropertyFieldValue(PROPERTY_MAILTASK_TEXT, serviceTask, propertiesNode);
             setPropertyFieldValue(PROPERTY_MAILTASK_HTML, serviceTask, propertiesNode);
+            setPropertyFieldValue(PROPERTY_MAILTASK_HTML_VAR, serviceTask, propertiesNode);
+            setPropertyFieldValue(PROPERTY_MAILTASK_TEXT_VAR, serviceTask, propertiesNode);
             setPropertyFieldValue(PROPERTY_MAILTASK_CHARSET, serviceTask, propertiesNode);
 
         } else if ("camel".equalsIgnoreCase(serviceTask.getType())) {
@@ -98,6 +101,11 @@ public class ServiceTaskJsonConverter extends BaseBpmnJsonConverter implements D
                 }
                 if (PROPERTY_DECISIONTABLE_FALLBACK_TO_DEFAULT_TENANT_KEY.equals(fieldExtension.getFieldName())) {
                     propertiesNode.set(PROPERTY_DECISIONTABLE_FALLBACK_TO_DEFAULT_TENANT,
+                        BooleanNode.valueOf(Boolean.parseBoolean(fieldExtension.getStringValue()))
+                    );
+                }
+                if (PROPERTY_DECISIONTABLE_SAME_DEPLOYMENT_KEY.equals(fieldExtension.getFieldName())) {
+                    propertiesNode.set(PROPERTY_DECISIONTABLE_SAME_DEPLOYMENT,
                         BooleanNode.valueOf(Boolean.parseBoolean(fieldExtension.getStringValue()))
                     );
                 }
@@ -134,6 +142,7 @@ public class ServiceTaskJsonConverter extends BaseBpmnJsonConverter implements D
             setPropertyFieldValue(PROPERTY_SHELLTASK_ERROR_REDIRECT, "errorRedirect", serviceTask, propertiesNode);
             setPropertyFieldValue(PROPERTY_SHELLTASK_OUTPUT_VARIABLE, "outputVariable", serviceTask, propertiesNode);
             setPropertyFieldValue(PROPERTY_SHELLTASK_WAIT, "wait", serviceTask, propertiesNode);
+            
         } else {
             if (ImplementationType.IMPLEMENTATION_TYPE_CLASS.equals(serviceTask.getImplementationType())) {
                 propertiesNode.put(PROPERTY_SERVICETASK_CLASS, serviceTask.getImplementation());
@@ -155,7 +164,16 @@ public class ServiceTaskJsonConverter extends BaseBpmnJsonConverter implements D
                 propertiesNode.put(PROPERTY_SERVICETASK_USE_LOCAL_SCOPE_FOR_RESULT_VARIABLE, serviceTask.isUseLocalScopeForResultVariable());
             }
 
+            if (serviceTask.isStoreResultVariableAsTransient()) {
+                propertiesNode.put(PROPERTY_SERVICETASK_STORE_TRANSIENT_VARIABLE, serviceTask.isStoreResultVariableAsTransient());
+            }
+
+            if (StringUtils.isNotEmpty(serviceTask.getFailedJobRetryTimeCycleValue())) {
+            	propertiesNode.put(PROPERTY_SERVICETASK_FAILED_JOB_RETRY_TIME_CYCLE, serviceTask.getFailedJobRetryTimeCycleValue());
+            }
+
             addFieldExtensions(serviceTask.getFieldExtensions(), propertiesNode);
+            addMapException(serviceTask.getMapExceptions(), propertiesNode);
         }
     }
 
@@ -187,6 +205,14 @@ public class ServiceTaskJsonConverter extends BaseBpmnJsonConverter implements D
             task.setUseLocalScopeForResultVariable(true);
         }
 
+        if (getPropertyValueAsBoolean(PROPERTY_SERVICETASK_STORE_TRANSIENT_VARIABLE, elementNode)) {
+            task.setStoreResultVariableAsTransient(true);
+        }
+
+        if (StringUtils.isNotEmpty(getPropertyValueAsString(PROPERTY_SERVICETASK_FAILED_JOB_RETRY_TIME_CYCLE, elementNode))) {
+            task.setFailedJobRetryTimeCycleValue(getPropertyValueAsString(PROPERTY_SERVICETASK_FAILED_JOB_RETRY_TIME_CYCLE, elementNode));
+        }
+
         task.setSkipExpression(getPropertyValueAsString(PROPERTY_SKIP_EXPRESSION, elementNode));
 
         JsonNode fieldsNode = getProperty(PROPERTY_SERVICETASK_FIELDS, elementNode);
@@ -208,6 +234,24 @@ public class ServiceTaskJsonConverter extends BaseBpmnJsonConverter implements D
                         }
                         task.getFieldExtensions().add(field);
                     }
+                }
+            }
+        }
+
+        JsonNode exceptionsNode = getProperty(PROPERTY_SERVICETASK_EXCEPTIONS, elementNode);
+        if (exceptionsNode != null) {
+            JsonNode itemsArrayNode = exceptionsNode.get("exceptions");
+            if (itemsArrayNode != null) {
+                for (JsonNode itemNode : itemsArrayNode) {
+
+                    MapExceptionEntry exception = new MapExceptionEntry();
+
+
+                    exception.setClassName(getValueAsString(PROPERTY_SERVICETASK_EXCEPTION_CLASS, itemNode));
+                    exception.setErrorCode(getValueAsString(PROPERTY_SERVICETASK_EXCEPTION_CODE, itemNode));
+                    exception.setAndChildren(getValueAsBoolean(PROPERTY_SERVICETASK_EXCEPTION_CHILDREN, itemNode));
+                    task.getMapExceptions().add(exception);
+
                 }
             }
         }

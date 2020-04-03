@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.flowable.common.engine.api.variable.VariableContainer;
 import org.flowable.content.api.ContentItem;
 import org.flowable.content.api.ContentService;
 import org.flowable.engine.impl.util.CommandContextUtil;
@@ -115,8 +114,4 @@ public class DefaultFormFieldHandler implements FormFieldHandler {
         }
     }
 
-    @Override
-    public void validateFormFieldsOnSubmit(FormInfo formInfo, VariableContainer variableContainer, Map<String, Object> variables) {
-        // do not validate form fields on submit by default
-    }
 }

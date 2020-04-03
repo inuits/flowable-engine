@@ -49,6 +49,11 @@ public class VariableServiceImpl extends CommonServiceImpl<VariableServiceConfig
     }
 
     @Override
+    public List<VariableInstanceEntity> findVariableInstancesByProcessInstanceId(String processInstanceId) {
+        return getVariableInstanceEntityManager().findVariableInstancesByProcessInstanceId(processInstanceId);
+    }
+
+    @Override
     public List<VariableInstanceEntity> findVariableInstancesByExecutionId(String executionId) {
         return getVariableInstanceEntityManager().findVariableInstancesByExecutionId(executionId);
     }
@@ -111,6 +116,11 @@ public class VariableServiceImpl extends CommonServiceImpl<VariableServiceConfig
     @Override
     public VariableInstanceEntity createVariableInstance(String name, VariableType type, Object value) {
         return getVariableInstanceEntityManager().create(name, type, value);
+    }
+
+    @Override
+    public VariableInstanceEntity createVariableInstance(String name, VariableType type) {
+        return getVariableInstanceEntityManager().create(name, type);
     }
 
     @Override

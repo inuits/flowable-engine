@@ -19,9 +19,12 @@ import java.util.Set;
 
 import org.flowable.cmmn.api.runtime.CaseInstance;
 import org.flowable.cmmn.api.runtime.CaseInstanceQuery;
+import org.flowable.cmmn.engine.impl.persistence.entity.CaseInstanceEntity;
 import org.flowable.cmmn.engine.impl.util.CommandContextUtil;
 import org.flowable.common.engine.api.FlowableException;
 import org.flowable.common.engine.api.FlowableIllegalArgumentException;
+import org.flowable.common.engine.api.query.CacheAwareQuery;
+import org.flowable.common.engine.api.scope.ScopeTypes;
 import org.flowable.common.engine.impl.interceptor.CommandContext;
 import org.flowable.common.engine.impl.interceptor.CommandExecutor;
 import org.flowable.variable.service.impl.AbstractVariableQueryImpl;
@@ -30,7 +33,8 @@ import org.flowable.variable.service.impl.AbstractVariableQueryImpl;
  * @author Joram Barrez
  * @author Tijs Rademakers
  */
-public class CaseInstanceQueryImpl extends AbstractVariableQueryImpl<CaseInstanceQuery, CaseInstance> implements CaseInstanceQuery {
+public class CaseInstanceQueryImpl extends AbstractVariableQueryImpl<CaseInstanceQuery, CaseInstance>
+        implements CaseInstanceQuery, CacheAwareQuery<CaseInstanceEntity> {
 
     private static final long serialVersionUID = 1L;
 
@@ -51,6 +55,8 @@ public class CaseInstanceQueryImpl extends AbstractVariableQueryImpl<CaseInstanc
     protected String startedBy;
     protected String callbackId;
     protected String callbackType;
+    protected String referenceId;
+    protected String referenceType;
     protected boolean completeable;
     protected String tenantId;
     protected String tenantIdLike;
@@ -279,9 +285,35 @@ public class CaseInstanceQueryImpl extends AbstractVariableQueryImpl<CaseInstanc
             throw new FlowableIllegalArgumentException("callbackType is null");
         }
         if (inOrStatement) {
-            this.currentOrQueryObject.callbackType= callbackType;
+            this.currentOrQueryObject.callbackType = callbackType;
         } else {
             this.callbackType = callbackType;
+        }
+        return this;
+    }
+
+    @Override
+    public CaseInstanceQuery caseInstanceReferenceId(String referenceId) {
+        if (referenceId == null) {
+            throw new FlowableIllegalArgumentException("referenceId is null");
+        }
+        if (inOrStatement) {
+            this.currentOrQueryObject.referenceId = referenceId;
+        } else {
+            this.referenceId = referenceId;
+        }
+        return this;
+    }
+
+    @Override
+    public CaseInstanceQuery caseInstanceReferenceType(String referenceType) {
+        if (referenceType == null) {
+            throw new FlowableIllegalArgumentException("referenceType is null");
+        }
+        if (inOrStatement) {
+            this.currentOrQueryObject.referenceType = referenceType;
+        } else {
+            this.referenceType = referenceType;
         }
         return this;
     }
@@ -579,6 +611,14 @@ public class CaseInstanceQueryImpl extends AbstractVariableQueryImpl<CaseInstanc
         return CommandContextUtil.getCaseInstanceEntityManager(commandContext).findByCriteria(this);
     }
 
+    @Override
+    public void enhanceCachedValue(CaseInstanceEntity caseInstance) {
+        if (isIncludeCaseVariables()) {
+            caseInstance.getQueryVariables()
+                    .addAll(CommandContextUtil.getVariableService().findVariableInstanceByScopeIdAndScopeType(caseInstance.getId(), ScopeTypes.CMMN));
+        }
+    }
+
     public String getCaseDefinitionKey() {
         return caseDefinitionKey;
     }
@@ -600,6 +640,11 @@ public class CaseInstanceQueryImpl extends AbstractVariableQueryImpl<CaseInstanc
     }
 
     public String getCaseInstanceId() {
+        return caseInstanceId;
+    }
+    
+    @Override
+    public String getId() {
         return caseInstanceId;
     }
 
@@ -649,6 +694,14 @@ public class CaseInstanceQueryImpl extends AbstractVariableQueryImpl<CaseInstanc
 
     public String getCallbackType() {
         return callbackType;
+    }
+
+    public String getReferenceId() {
+        return referenceId;
+    }
+
+    public String getReferenceType() {
+        return referenceType;
     }
 
     public boolean isCompleteable() {

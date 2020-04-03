@@ -59,6 +59,7 @@ import org.xml.sax.SAXException;
  * @author Tijs Rademakers
  * @author Yvo Swillens
  * @author Bassam Al-Sarori
+ * @author Zheng Ji
  */
 public class DmnXMLConverter implements DmnXMLConstants {
 
@@ -165,11 +166,11 @@ public class DmnXMLConverter implements DmnXMLConstants {
         return schema;
     }
 
-    public DmnDefinition convertToDmnModel(InputStreamProvider inputStreamProvider, boolean validateSchema, boolean enableSafeBpmnXml) {
-        return convertToDmnModel(inputStreamProvider, validateSchema, enableSafeBpmnXml, DEFAULT_ENCODING);
+    public DmnDefinition convertToDmnModel(InputStreamProvider inputStreamProvider, boolean validateSchema, boolean enableSafeDmnXml) {
+        return convertToDmnModel(inputStreamProvider, validateSchema, enableSafeDmnXml, DEFAULT_ENCODING);
     }
 
-    public DmnDefinition convertToDmnModel(InputStreamProvider inputStreamProvider, boolean validateSchema, boolean enableSafeBpmnXml, String encoding) {
+    public DmnDefinition convertToDmnModel(InputStreamProvider inputStreamProvider, boolean validateSchema, boolean enableSafeDmnXml, String encoding) {
         XMLInputFactory xif = XMLInputFactory.newInstance();
 
         if (xif.isPropertySupported(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES)) {
@@ -186,7 +187,7 @@ public class DmnXMLConverter implements DmnXMLConstants {
 
         if (validateSchema) {
             try (InputStreamReader in = new InputStreamReader(inputStreamProvider.getInputStream(), encoding)) {
-                if (!enableSafeBpmnXml) {
+                if (!enableSafeDmnXml) {
                     validateModel(inputStreamProvider);
                 } else {
                     validateModel(xif.createXMLStreamReader(in));
@@ -245,6 +246,11 @@ public class DmnXMLConverter implements DmnXMLConstants {
                     model.addDecision(decision);
                     decision.setId(xtr.getAttributeValue(null, ATTRIBUTE_ID));
                     decision.setName(xtr.getAttributeValue(null, ATTRIBUTE_NAME));
+
+                    if (Boolean.parseBoolean(xtr.getAttributeValue(FLOWABLE_EXTENSIONS_NAMESPACE, ATTRIBUTE_FORCE_DMN_11))) {
+                        decision.setForceDMN11(true);
+                    }
+
                     parentElement = decision;
                 } else if (ELEMENT_DECISION_TABLE.equals(xtr.getLocalName())) {
                     currentDecisionTable = new DecisionTable();
@@ -341,6 +347,11 @@ public class DmnXMLConverter implements DmnXMLConstants {
                 xtw.writeAttribute(ATTRIBUTE_ID, decision.getId());
                 if (StringUtils.isNotEmpty(decision.getName())) {
                     xtw.writeAttribute(ATTRIBUTE_NAME, decision.getName());
+                }
+
+                if (decision.isForceDMN11()) {
+                    xtw.writeNamespace(FLOWABLE_EXTENSIONS_PREFIX, FLOWABLE_EXTENSIONS_NAMESPACE);
+                    xtw.writeAttribute(FLOWABLE_EXTENSIONS_PREFIX, FLOWABLE_EXTENSIONS_NAMESPACE, ATTRIBUTE_FORCE_DMN_11, "true");
                 }
 
                 DmnXMLUtil.writeElementDescription(decision, xtw);
@@ -445,9 +456,11 @@ public class DmnXMLConverter implements DmnXMLConstants {
 
                         DmnXMLUtil.writeExtensionElements(container.getInputEntry(), xtw);
 
-                        xtw.writeStartElement(ELEMENT_TEXT);
-                        xtw.writeCData(container.getInputEntry().getText());
-                        xtw.writeEndElement();
+                        if (StringUtils.isNotEmpty(container.getInputEntry().getText())) {
+                            xtw.writeStartElement(ELEMENT_TEXT);
+                            xtw.writeCData(container.getInputEntry().getText());
+                            xtw.writeEndElement();
+                        }
 
                         xtw.writeEndElement();
                     }
@@ -456,9 +469,11 @@ public class DmnXMLConverter implements DmnXMLConstants {
                         xtw.writeStartElement(ELEMENT_OUTPUT_ENTRY);
                         xtw.writeAttribute(ATTRIBUTE_ID, container.getOutputEntry().getId());
 
-                        xtw.writeStartElement(ELEMENT_TEXT);
-                        xtw.writeCData(container.getOutputEntry().getText());
-                        xtw.writeEndElement();
+                        if (StringUtils.isNotEmpty(container.getOutputEntry().getText())) {
+                            xtw.writeStartElement(ELEMENT_TEXT);
+                            xtw.writeCData(container.getOutputEntry().getText());
+                            xtw.writeEndElement();
+                        }
 
                         xtw.writeEndElement();
                     }
@@ -484,8 +499,8 @@ public class DmnXMLConverter implements DmnXMLConstants {
             return outputStream.toByteArray();
 
         } catch (Exception e) {
-            LOGGER.error("Error writing BPMN XML", e);
-            throw new DmnXMLException("Error writing BPMN XML", e);
+            LOGGER.error("Error writing DMN XML", e);
+            throw new DmnXMLException("Error writing DMN XML", e);
         }
     }
 }

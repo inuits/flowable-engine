@@ -27,13 +27,14 @@ import org.flowable.common.engine.impl.el.ExpressionManager;
 import org.flowable.common.engine.impl.history.HistoryLevel;
 import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.common.engine.impl.interceptor.CommandContext;
+import org.flowable.common.engine.impl.logging.LoggingSessionConstants;
 import org.flowable.engine.compatibility.Flowable5CompatibilityHandler;
 import org.flowable.engine.delegate.TaskListener;
 import org.flowable.engine.delegate.event.impl.FlowableEventBuilder;
 import org.flowable.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.flowable.engine.impl.persistence.CountingExecutionEntity;
 import org.flowable.engine.impl.persistence.entity.ExecutionEntity;
-import org.flowable.identitylink.api.IdentityLinkType;
+import org.flowable.entitylink.api.EntityLink;
 import org.flowable.identitylink.service.event.impl.FlowableIdentityLinkEventBuilder;
 import org.flowable.identitylink.service.impl.persistence.entity.IdentityLinkEntity;
 import org.flowable.task.api.DelegationState;
@@ -91,12 +92,11 @@ public class TaskHelper {
             }
         }
 
-        CommandContextUtil.getProcessEngineConfiguration(commandContext).getListenerNotificationHelper()
-            .executeTaskListeners(taskEntity, TaskListener.EVENTNAME_COMPLETE);
-        if (Authentication.getAuthenticatedUserId() != null && taskEntity.getProcessInstanceId() != null) {
-            ExecutionEntity processInstanceEntity = CommandContextUtil.getExecutionEntityManager(commandContext).findById(taskEntity.getProcessInstanceId());
-            IdentityLinkUtil.createProcessInstanceIdentityLink(processInstanceEntity,
-                    Authentication.getAuthenticatedUserId(), null, IdentityLinkType.PARTICIPANT);
+        ProcessEngineConfigurationImpl processEngineConfiguration = CommandContextUtil.getProcessEngineConfiguration(commandContext);
+        processEngineConfiguration.getListenerNotificationHelper().executeTaskListeners(taskEntity, TaskListener.EVENTNAME_COMPLETE);
+        
+        if (processEngineConfiguration.getIdentityLinkInterceptor() != null) {
+            processEngineConfiguration.getIdentityLinkInterceptor().handleCompleteTask(taskEntity);
         }
 
         logUserTaskCompleted(taskEntity);
@@ -109,6 +109,21 @@ public class TaskHelper {
             } else {
                 eventDispatcher.dispatchEvent(
                         FlowableEventBuilder.createEntityEvent(FlowableEngineEventType.TASK_COMPLETED, taskEntity));
+            }
+        }
+        
+        if (processEngineConfiguration.isLoggingSessionEnabled() && taskEntity.getExecutionId() != null) {
+            String taskLabel = null;
+            if (StringUtils.isNotEmpty(taskEntity.getName())) {
+                taskLabel = taskEntity.getName();
+            } else {
+                taskLabel = taskEntity.getId();
+            }
+        
+            ExecutionEntity execution = CommandContextUtil.getExecutionEntityManager().findById(taskEntity.getExecutionId());
+            if (execution != null) {
+                BpmnLoggingSessionUtil.addLoggingData(LoggingSessionConstants.TYPE_USER_TASK_COMPLETE, 
+                                "User task '" + taskLabel + "' completed", taskEntity, execution);
             }
         }
 
@@ -158,7 +173,7 @@ public class TaskHelper {
         }
     }
 
-    public static void insertTask(TaskEntity taskEntity, ExecutionEntity execution, boolean fireCreateEvent) {
+    public static void insertTask(TaskEntity taskEntity, ExecutionEntity execution, boolean fireCreateEvent, boolean addEntityLinks) {
         // Inherit tenant id (if applicable)
         if (execution != null && execution.getTenantId() != null) {
             taskEntity.setTenantId(execution.getTenantId());
@@ -173,9 +188,17 @@ public class TaskHelper {
 
         insertTask(taskEntity, fireCreateEvent);
 
-        if (execution != null && CountingEntityUtil.isExecutionRelatedEntityCountEnabled(execution)) {
-            CountingExecutionEntity countingExecutionEntity = (CountingExecutionEntity) execution;
-            countingExecutionEntity.setTaskCount(countingExecutionEntity.getTaskCount() + 1);
+        if (execution != null) {
+
+            if (CountingEntityUtil.isExecutionRelatedEntityCountEnabled(execution)) {
+                CountingExecutionEntity countingExecutionEntity = (CountingExecutionEntity) execution;
+                countingExecutionEntity.setTaskCount(countingExecutionEntity.getTaskCount() + 1);
+            }
+
+            if (addEntityLinks) {
+                EntityLinkUtil.createEntityLinks(execution.getProcessInstanceId(), taskEntity.getId(), ScopeTypes.TASK);
+            }
+
         }
 
         FlowableEventDispatcher eventDispatcher = CommandContextUtil.getEventDispatcher();
@@ -201,15 +224,21 @@ public class TaskHelper {
     }
 
     public static void addAssigneeIdentityLinks(TaskEntity taskEntity) {
-        CommandContextUtil.getInternalTaskAssignmentManager().addUserIdentityLinkToParent(taskEntity, taskEntity.getAssignee());
+        ProcessEngineConfigurationImpl processEngineConfiguration = CommandContextUtil.getProcessEngineConfiguration();
+        if (processEngineConfiguration.getIdentityLinkInterceptor() != null) {
+            processEngineConfiguration.getIdentityLinkInterceptor().handleAddAssigneeIdentityLinkToTask(taskEntity, taskEntity.getAssignee());
+        }
     }
 
     public static void addOwnerIdentityLink(TaskEntity taskEntity, String owner) {
         if (owner == null && taskEntity.getOwner() == null) {
             return;
         }
-
-        CommandContextUtil.getInternalTaskAssignmentManager().addUserIdentityLinkToParent(taskEntity, owner);
+        
+        ProcessEngineConfigurationImpl processEngineConfiguration = CommandContextUtil.getProcessEngineConfiguration();
+        if (processEngineConfiguration.getIdentityLinkInterceptor() != null) {
+            processEngineConfiguration.getIdentityLinkInterceptor().handleAddOwnerIdentityLinkToTask(taskEntity, owner);
+        }
     }
     
     /**

@@ -35,6 +35,7 @@ public abstract class AbstractServiceConfiguration {
     /** The tenant id indicating 'no tenant' */
     public static final String NO_TENANT_ID = "";
 
+    protected String engineName;
     protected boolean enableEventDispatcher = true;
     protected FlowableEventDispatcher eventDispatcher;
     protected List<FlowableEventListener> eventListeners;
@@ -46,6 +47,10 @@ public abstract class AbstractServiceConfiguration {
     protected ObjectMapper objectMapper;
 
     protected Clock clock;
+    
+    public AbstractServiceConfiguration(String engineName) {
+        this.engineName = engineName;
+    }
     
     public boolean isHistoryLevelAtLeast(HistoryLevel level) {
         if (logger.isDebugEnabled()) {
@@ -60,6 +65,18 @@ public abstract class AbstractServiceConfiguration {
             logger.debug("Current history level: {}", historyLevel);
         }
         return historyLevel != HistoryLevel.NONE;
+    }
+
+    public String getEngineName() {
+        return engineName;
+    }
+
+    public void setEngineName(String engineName) {
+        this.engineName = engineName;
+    }
+    
+    public boolean isEventDispatcherEnabled() {
+        return getEventDispatcher() != null && getEventDispatcher().isEnabled();
     }
 
     public boolean isEnableEventDispatcher() {
@@ -106,7 +123,7 @@ public abstract class AbstractServiceConfiguration {
         this.additionalEventDispatchActions = additionalEventDispatchActions;
         return this;
     }
-    
+
     public HistoryLevel getHistoryLevel() {
         return historyLevel;
     }

@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -219,7 +220,7 @@ public abstract class BaseSpringRestTestCase extends TestCase {
             if (expectedStatusCode != responseStatusCode) {
                 LOGGER.info("Wrong status code : {}, but should be {}", responseStatusCode, expectedStatusCode);
                 if (response.getEntity() != null) {
-                    LOGGER.info("Response body: {}", IOUtils.toString(response.getEntity().getContent(), "utf-8"));
+                    LOGGER.info("Response body: {}", IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8));
                 }
             }
 
@@ -281,8 +282,6 @@ public abstract class BaseSpringRestTestCase extends TestCase {
      * Checks if the returned "data" array (child-node of root-json node returned by invoking a GET on the given url) contains entries with the given ID's.
      */
     protected void assertResultsPresentInDataResponse(String url, String submittedBy, String... expectedResourceIds) throws IOException {
-        int numberOfResultsExpected = expectedResourceIds.length;
-
         // Do the actual call
         CloseableHttpResponse response = executeRequest(new HttpGet(SERVER_URL_PREFIX + url), HttpStatus.SC_OK);
 
