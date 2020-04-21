@@ -90,13 +90,15 @@ public class KeyCloakSSOHandler implements SSOHandler {
     public String getExternalUrl(String redirectUri) {
         this.redirectUri = redirectUri;
         this.state = UUID.randomUUID().toString();
-        return ssoExternalUrl
+        String externalUrl = ssoExternalUrl
             + "?response_type=code"
             + "&client_id=" + ssoClientId
             + "&scope=" + ssoScope
             + "&state=" + state
             + "&redirect_uri=" + redirectUri
             + "&response_mode=query";
+        LOGGER.info("Keycloak external url: " + externalUrl);
+        return externalUrl;
     }
 
     private String getAccessToken(String code) {
