@@ -50,6 +50,13 @@ public class JsonType implements VariableType, MutableVariableType<JsonNode, Jso
         this(maxLength, objectMapper, trackObjects, TYPE_NAME);
     }
 
+    public JsonType(int maxLength, ObjectMapper objectMapper) {
+        this.maxLength = maxLength;
+        this.objectMapper = objectMapper;
+        this.trackObjects = false;
+        this.typeName = "json";
+    }
+
     protected JsonType(int maxLength, ObjectMapper objectMapper, boolean trackObjects, String typeName) {
         this.maxLength = maxLength;
         this.trackObjects = trackObjects;
