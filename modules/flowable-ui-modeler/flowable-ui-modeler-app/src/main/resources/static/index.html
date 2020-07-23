@@ -43,7 +43,13 @@
 
 </head>
 <body ng-app="flowableModeler" ng-cloak>
-
+    <div class="container-fluid" style="position: relative; top: 44px; padding-bottom: 10px; padding-right: 7px;" ng-if="account.tenants.length > 1">
+        <div class="tenant-switcher" style="width: 20%;float: right;">
+            <select class="form-control" ng-model="account.tenantId" ng-change="changeCurrentTenant()">
+                <option ng-repeat="tenant in account.tenants" value="{{tenant.id}}">{{tenant.name}}</option>
+            </select>
+        </div>
+    </div>
     <div class="navbar navbar-fixed-top navbar-inverse" role="navigation" id="main-header">
         <div class="fixed-container">
             <div class="navbar-header">
@@ -55,11 +61,6 @@
                         <a ng-click="setMainPage(item)">{{item.title | translate}}</a>
                     </li>
                 </ul>
-                <div class="tenant-switcher" style="width: 20%;float: right;" ng-if="account.tenants.length > 1">
-                    <select class="form-control" ng-model="account.tenantId" ng-change="changeCurrentTenant()">
-                        <option ng-repeat="tenant in account.tenants" value="{{tenant.id}}">{{tenant.name}}</option>
-                    </select>
-                </div>
             </div>
             <div class="pull-right {{currentAppDefinition.definition.theme}}"
                  ng-class="{'app-indicator': currentAppDefinition}" ng-if="authenticated" ng-cloack>
