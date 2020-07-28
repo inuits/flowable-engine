@@ -25,6 +25,7 @@ import org.flowable.ui.common.service.exception.UnauthorizedException;
 import org.flowable.ui.idm.model.UserInformation;
 import org.flowable.ui.idm.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,6 +46,9 @@ public class AccountResource {
 
     @Autowired
     private UserService userService;
+
+    @Value("${flowable.admin.app.security.tenant-mapping:#{null}}")
+    private Boolean tenantMapping;
 
     /**
      * GET /rest/authenticate -> check if the user is authenticated, and return its full name.
@@ -86,6 +90,7 @@ public class AccountResource {
                     userRepresentation.getTenants().add(new TenantRepresentation(tenant));
                 }
             }
+            userRepresentation.setTenantMapping(tenantMapping);
             return userRepresentation;
         } else {
             throw new NotFoundException();

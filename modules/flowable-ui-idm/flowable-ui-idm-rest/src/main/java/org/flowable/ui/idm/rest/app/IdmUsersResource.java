@@ -21,6 +21,7 @@ import org.flowable.ui.idm.model.UpdateUsersRepresentation;
 import org.flowable.ui.idm.service.UserService;
 import org.flowable.ui.idm.service.TenantService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,6 +51,9 @@ public class IdmUsersResource {
     @Autowired
     protected TenantService tenantService;
 
+    @Value("${flowable.admin.app.security.tenant-mapping:#{null}}")
+    private Boolean tenantMapping;
+
     @GetMapping(value = "/rest/admin/users")
     public ResultListDataRepresentation getUsers(
             @RequestParam(required = false) String filter,
@@ -72,11 +76,13 @@ public class IdmUsersResource {
         List<UserRepresentation> result = new ArrayList<>(users.size());
         for (User user : users) {
             UserRepresentation ur = new UserRepresentation(user);
-            tenantService.getTenantsForUser(user.getId()).forEach(
-                (tenant) -> {
-                    ur.getTenants().add(new TenantRepresentation(tenant));
-                }
-            );
+            if(tenantMapping){
+                tenantService.getTenantsForUser(user.getId()).forEach(
+                    (tenant) -> {
+                        ur.getTenants().add(new TenantRepresentation(tenant));
+                    }
+                );
+            }
             result.add(ur);
         }
         return result;
@@ -86,8 +92,12 @@ public class IdmUsersResource {
     @PutMapping(value = "/rest/admin/users/{userId}")
     public void updateUserDetails(@PathVariable String userId, @RequestBody UpdateUsersRepresentation updateUsersRepresentation) {
         String tenantId = null;
-        if(!updateUsersRepresentation.getTenants().isEmpty()){
-            tenantId = updateUsersRepresentation.getTenants().get(0);
+        if(tenantMapping){
+            if(!updateUsersRepresentation.getTenants().isEmpty()){
+                tenantId = updateUsersRepresentation.getTenants().get(0);
+            }
+        } else {
+            tenantId = updateUsersRepresentation.getTenantId();
         }
         userService.updateUserDetails(userId, updateUsersRepresentation.getFirstName(),
                 updateUsersRepresentation.getLastName(),
@@ -95,16 +105,18 @@ public class IdmUsersResource {
                 tenantId
                 );
 
-        tenantService.getTenantsForUser(userId).forEach(
-            (tenant) -> {
-                tenantService.deleteTenantMember(tenant.getId(), userId);
-            }
-        );
-        updateUsersRepresentation.getTenants().forEach(
-            (tenant) -> {
-                tenantService.addTenantMember(tenant, userId);
-            }
-        );
+        if(tenantMapping){
+            tenantService.getTenantsForUser(userId).forEach(
+                (tenant) -> {
+                    tenantService.deleteTenantMember(tenant.getId(), userId);
+                }
+            );
+            updateUsersRepresentation.getTenants().forEach(
+                (tenant) -> {
+                    tenantService.addTenantMember(tenant, userId);
+                }
+            );
+        }
     }
 
     @ResponseStatus(value = HttpStatus.OK)
@@ -122,8 +134,12 @@ public class IdmUsersResource {
     @PostMapping(value = "/rest/admin/users")
     public UserRepresentation createNewUser(@RequestBody CreateUserRepresentation userRepresentation) {
         String tenantId = null;
-        if(!userRepresentation.getTenants().isEmpty()){
-            tenantId = userRepresentation.getTenantIds().get(0);
+        if(tenantMapping){
+            if(!userRepresentation.getTenants().isEmpty()){
+                tenantId = userRepresentation.getTenantIds().get(0);
+            }
+        } else {
+            tenantId = userRepresentation.getTenantId();
         }
         UserRepresentation ur = new UserRepresentation(userService.createNewUser(
             userRepresentation.getId(),
@@ -134,12 +150,14 @@ public class IdmUsersResource {
             tenantId
             ));
 
-        userRepresentation.getTenantIds().forEach(
-            (tenant) -> {
-                tenantService.addTenantMember(tenant, userRepresentation.getId());
-                userRepresentation.getTenants().add(new TenantRepresentation(tenantService.getTenant(tenant)));
-            }
-        );
+        if(tenantMapping){
+            userRepresentation.getTenantIds().forEach(
+                (tenant) -> {
+                    tenantService.addTenantMember(tenant, userRepresentation.getId());
+                    userRepresentation.getTenants().add(new TenantRepresentation(tenantService.getTenant(tenant)));
+                }
+            );
+        }
 
         return ur;
     }

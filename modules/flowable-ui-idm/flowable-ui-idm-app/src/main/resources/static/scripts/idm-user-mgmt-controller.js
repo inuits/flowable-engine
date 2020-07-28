@@ -254,6 +254,7 @@ flowableApp.controller('IdmCreateUserPopupController', ['$rootScope', '$scope', 
                 firstName: model.user.firstName,
                 lastName: model.user.lastName,
                 password: model.user.password,
+                tenantId: model.user.tenantId,
                 tenantIds: model.user.currentTenants,
             };
 
@@ -297,6 +298,7 @@ flowableApp.controller('IdmCreateUserPopupController', ['$rootScope', '$scope', 
                 email: model.user.email,
                 firstName: model.user.firstName,
                 lastName: model.user.lastName,
+                tenantId: model.user.tenantId,
                 tenants: model.user.currentTenants,
             };
 

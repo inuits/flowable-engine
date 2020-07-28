@@ -206,15 +206,16 @@ flowableApp
                         id: 'privilegeMgmt',
                         title: 'IDM.GENERAL.NAVIGATION.PRIVILEGE-MGMT',
                         path: '/privilege-mgmt'
-                    },
-                    {
-                        id: 'tenantMgmt',
-                        title: 'IDM.GENERAL.NAVIGATION.TENANT-MGMT',
-                        path: '/tenant-mgmt'
                     }
                 ];
 
-
+                if($rootScope.account && $rootScope.account.tenantMapping){
+                    $rootScope.mainNavigation.push({
+                        id: 'tenantMgmt',
+                        title: 'IDM.GENERAL.NAVIGATION.TENANT-MGMT',
+                        path: '/tenant-mgmt'
+                    });
+                }
                 /*
                  * Set the current main page, using the page object. If the page is already active,
                  * this is a no-op.

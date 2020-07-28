@@ -84,7 +84,8 @@
                             <td>{{user.email}}</td>
                             <td>{{user.fullName}}</td>
                             <td>
-                                <p ng-repeat="tenant in user.tenants">{{tenant.name}}</p>
+                                <p ng-if="user.tenants.length > 0" ng-repeat="tenant in user.tenants">{{tenant.name}}</p>
+                                <p ng-if="user.tenants.length === 0" >{{user.tenantId}}</p>
                             </td>
                         </tr>
                     </table>
