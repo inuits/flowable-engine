@@ -256,4 +256,55 @@ public interface IdmIdentityService {
      */
     PrivilegeQuery createPrivilegeQuery();
 
+    /**
+     * Creates a {@link TenantQuery} that allows to programmatically query the tenants.
+     */
+    TenantQuery createTenantQuery();
+
+    /**
+     * Saves the tenant. If the tenant already existed, the tenant is updated.
+     * 
+     * @param tenant
+     *            tenant to save. Cannot be null.
+     * @throws RuntimeException
+     *             when a tenant with the same name already exists.
+     */
+    void saveTenant(Tenant tenant);
+
+    /**
+     * Deletes the tenant. When no tenant exists with the given id, this operation is ignored.
+     * 
+     * @param tenantId
+     *            id of the tenant that should be deleted, cannot be null.
+     */
+    void deleteTenant(String tenantId);
+
+    /**
+     * Creates a new tenant. The tenant is transient and must be saved using {@link #saveTenant(Tenant)}.
+     * 
+     * @param tenantId
+     *            id for the new tenant, cannot be null.
+     */
+    Tenant newTenant(String tenantId);
+
+    /**
+     * @param userId
+     *            the userId, cannot be null.
+     * @param tenantId
+     *            the tenantId, cannot be null.
+     * @throws RuntimeException
+     *             when the given user or tenant doesn't exist or when the user is already member of the tenant.
+     */
+    void createTenantMembership(String userId, String tenantId);
+
+    /**
+     * Delete the membership of the user in the tenant. When the tenant or user don't exist or when the user is not a member of the tenant, this operation is ignored.
+     * 
+     * @param userId
+     *            the user's id, cannot be null.
+     * @param tenantId
+     *            the tenant's id, cannot be null.
+     */
+    void deleteTenantMembership(String userId, String tenantId);
+
 }

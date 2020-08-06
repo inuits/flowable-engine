@@ -26,6 +26,8 @@
     <mapper resource="org/flowable/idm/db/mapping/entity/Membership.xml" />
     <mapper resource="org/flowable/idm/db/mapping/entity/Property.xml" />
     <mapper resource="org/flowable/idm/db/mapping/entity/TableData.xml" />
+    <mapper resource="org/flowable/idm/db/mapping/entity/Tenant.xml" />
+    <mapper resource="org/flowable/idm/db/mapping/entity/TenantMembership.xml" />
     <mapper resource="org/flowable/idm/db/mapping/entity/Token.xml" />
     <mapper resource="org/flowable/idm/db/mapping/entity/User.xml" />
     <mapper resource="org/flowable/idm/db/mapping/entity/Privilege.xml" />

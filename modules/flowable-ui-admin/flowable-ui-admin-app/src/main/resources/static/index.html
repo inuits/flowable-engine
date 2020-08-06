@@ -94,6 +94,11 @@
                         <ul class="nav navbar-nav" ng-if="navigation.main == 'content-engine'">
                             <li ng-class="{active: navigation.sub == 'content-items'}"><a href="#content-items" translate="GENERAL.MENU.CONTENT-ITEMS"></a></li>
                         </ul>
+                        <div class="tenant-switcher" style="width: 20%;float: right;" ng-if="account.tenants.length > 1">
+                            <select class="form-control" ng-model="account.tenantId" ng-change="changeCurrentTenant()">
+                                <option ng-repeat="tenant in account.tenants" value="{{tenant.id}}">{{tenant.name}}</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 

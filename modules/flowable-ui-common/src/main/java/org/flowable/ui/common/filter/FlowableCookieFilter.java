@@ -31,9 +31,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.flowable.common.engine.api.FlowableException;
 import org.flowable.ui.common.model.RemoteToken;
 import org.flowable.ui.common.model.RemoteUser;
+import org.flowable.ui.common.model.RemoteTenant;
 import org.flowable.ui.common.properties.FlowableCommonAppProperties;
 import org.flowable.ui.common.security.CookieConstants;
 import org.flowable.ui.common.security.FlowableAppUser;
+import org.flowable.ui.common.security.SecurityUtils;
 import org.flowable.ui.common.service.idm.RemoteIdmService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,6 +167,19 @@ public class FlowableCookieFilter extends OncePerRequestFilter {
             }
         }
 
+        String tenantId = getTenantFromCookie(request);
+        if(tenantId != null && (SecurityUtils.getCurrentTenantId() == null || !tenantId.equals(SecurityUtils.getCurrentTenantId()))){
+            RemoteUser remoteUser = remoteIdmService.getUser(SecurityUtils.getCurrentUserId());
+            if (remoteUser != null && remoteUser.getTenants() != null && remoteUser.getTenants().size() > 1) {
+                for (RemoteTenant remoteTenant : remoteUser.getTenants()) {
+                    if(remoteTenant.getId().equals(tenantId)) {
+                        SecurityUtils.setCurrentTenantId(tenantId);
+                        LOGGER.debug("User {} switched to tenant: {}", remoteUser.getDisplayName(), tenantId);
+                    }
+                }
+            }
+        }
+
         try {
             filterChain.doFilter(request, response);
         } finally {
@@ -200,6 +215,20 @@ public class FlowableCookieFilter extends OncePerRequestFilter {
                         LOGGER.trace("Could not get token", e);
                         return null;
                     }
+                }
+            }
+        }
+
+        return null;
+    }
+
+
+    protected String getTenantFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (CookieConstants.COOKIE_TENANT.equals(cookie.getName())) {
+                    return cookie.getValue();
                 }
             }
         }

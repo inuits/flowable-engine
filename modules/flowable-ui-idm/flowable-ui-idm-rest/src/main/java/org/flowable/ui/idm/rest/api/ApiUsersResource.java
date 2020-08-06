@@ -14,8 +14,10 @@ package org.flowable.ui.idm.rest.api;
 
 import org.flowable.idm.api.Group;
 import org.flowable.idm.api.User;
+import org.flowable.idm.api.Tenant;
 import org.flowable.ui.common.model.GroupRepresentation;
 import org.flowable.ui.common.model.UserRepresentation;
+import org.flowable.ui.common.model.TenantRepresentation;
 import org.flowable.ui.common.service.exception.NotFoundException;
 import org.flowable.ui.idm.model.UserInformation;
 import org.flowable.ui.idm.service.UserService;
@@ -46,6 +48,11 @@ public class ApiUsersResource {
             if (userInformation.getPrivileges() != null) {
                 for (String privilege : userInformation.getPrivileges()) {
                     userRepresentation.getPrivileges().add(privilege);
+                }
+            }
+            if (userInformation.getTenants() != null) {
+                for (Tenant tenant : userInformation.getTenants()) {
+                    userRepresentation.getTenants().add(new TenantRepresentation(tenant));
                 }
             }
             return userRepresentation;

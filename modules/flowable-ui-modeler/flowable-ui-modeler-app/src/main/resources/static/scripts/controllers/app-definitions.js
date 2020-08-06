@@ -65,7 +65,7 @@ angular.module('flowableModeler')
 		  var params = {
 		      filter: $scope.model.activeFilter.id,
 		      sort: $scope.model.activeSort.id,
-		      modelType: 3
+              modelType: 3
 		  };
 
 		  if ($scope.model.filterText && $scope.model.filterText != '') {

@@ -1,4 +1,3 @@
-
 <div class="main-list" id="main-list">
     <div class="list-subheader clearfix" style="margin-top: 0px">
         <div class="btn-group pull-right">
@@ -84,7 +83,10 @@
                             <td>{{user.id}}</td>
                             <td>{{user.email}}</td>
                             <td>{{user.fullName}}</td>
-                            <td>{{user.tenantId}}</td>
+                            <td>
+                                <p ng-if="user.tenants.length > 0" ng-repeat="tenant in user.tenants">{{tenant.name}}</p>
+                                <p ng-if="user.tenants.length === 0" >{{user.tenantId}}</p>
+                            </td>
                         </tr>
                     </table>
                 </div>

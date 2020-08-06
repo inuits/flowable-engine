@@ -50,6 +50,7 @@ public class UserQueryImpl extends AbstractQuery<UserQuery, User> implements Use
     protected String groupId;
     protected List<String> groupIds;
     protected String tenantId;
+    protected List<String> tenantIds;
 
     public UserQueryImpl() {
     }
@@ -225,6 +226,24 @@ public class UserQueryImpl extends AbstractQuery<UserQuery, User> implements Use
     }
 
     @Override
+    public UserQuery memberOfTenant(String tenantId) {
+        if (tenantId == null) {
+            throw new FlowableIllegalArgumentException("Provided tenantId is null");
+        }
+        this.tenantId = tenantId;
+        return this;
+    }
+
+    @Override
+    public UserQuery memberOfTenants(List<String> tenantIds) {
+        if (tenantIds == null) {
+            throw new FlowableIllegalArgumentException("Provided tenantIds is null");
+        }
+        this.tenantIds = tenantIds;
+        return this;
+    }
+
+    @Override
     public UserQuery tenantId(String tenantId) {
         if (tenantId == null) {
             throw new FlowableIllegalArgumentException("TenantId is null");
@@ -320,6 +339,14 @@ public class UserQueryImpl extends AbstractQuery<UserQuery, User> implements Use
 
     public List<String> getGroupIds() {
         return groupIds;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public List<String> getTenantIds() {
+        return tenantIds;
     }
 
     public String getFullNameLike() {

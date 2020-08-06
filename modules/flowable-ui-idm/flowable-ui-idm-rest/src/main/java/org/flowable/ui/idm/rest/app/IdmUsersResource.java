@@ -15,10 +15,13 @@ package org.flowable.ui.idm.rest.app;
 import org.flowable.idm.api.User;
 import org.flowable.ui.common.model.ResultListDataRepresentation;
 import org.flowable.ui.common.model.UserRepresentation;
+import org.flowable.ui.common.model.TenantRepresentation;
 import org.flowable.ui.idm.model.CreateUserRepresentation;
 import org.flowable.ui.idm.model.UpdateUsersRepresentation;
 import org.flowable.ui.idm.service.UserService;
+import org.flowable.ui.idm.service.TenantService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,6 +39,7 @@ import java.util.List;
 /**
  * @author Frederik Heremans
  * @author Joram Barrez
+ * @author Ruben De Swaef
  */
 @RestController
 @RequestMapping("/app")
@@ -43,6 +47,12 @@ public class IdmUsersResource {
 
     @Autowired
     protected UserService userService;
+
+    @Autowired
+    protected TenantService tenantService;
+
+    @Value("${flowable.admin.app.security.tenant-mapping:#{null}}")
+    private Boolean tenantMapping;
 
     @GetMapping(value = "/rest/admin/users")
     public ResultListDataRepresentation getUsers(
@@ -65,7 +75,15 @@ public class IdmUsersResource {
     protected List<UserRepresentation> convertToUserRepresentations(List<User> users) {
         List<UserRepresentation> result = new ArrayList<>(users.size());
         for (User user : users) {
-            result.add(new UserRepresentation(user));
+            UserRepresentation ur = new UserRepresentation(user);
+            if(tenantMapping){
+                tenantService.getTenantsForUser(user.getId()).forEach(
+                    (tenant) -> {
+                        ur.getTenants().add(new TenantRepresentation(tenant));
+                    }
+                );
+            }
+            result.add(ur);
         }
         return result;
     }
@@ -73,10 +91,32 @@ public class IdmUsersResource {
     @ResponseStatus(value = HttpStatus.OK)
     @PutMapping(value = "/rest/admin/users/{userId}")
     public void updateUserDetails(@PathVariable String userId, @RequestBody UpdateUsersRepresentation updateUsersRepresentation) {
+        String tenantId = null;
+        if(tenantMapping){
+            if(!updateUsersRepresentation.getTenants().isEmpty()){
+                tenantId = updateUsersRepresentation.getTenants().get(0);
+            }
+        } else {
+            tenantId = updateUsersRepresentation.getTenantId();
+        }
         userService.updateUserDetails(userId, updateUsersRepresentation.getFirstName(),
                 updateUsersRepresentation.getLastName(),
                 updateUsersRepresentation.getEmail(),
-                updateUsersRepresentation.getTenantId());
+                tenantId
+                );
+
+        if(tenantMapping){
+            tenantService.getTenantsForUser(userId).forEach(
+                (tenant) -> {
+                    tenantService.deleteTenantMember(tenant.getId(), userId);
+                }
+            );
+            updateUsersRepresentation.getTenants().forEach(
+                (tenant) -> {
+                    tenantService.addTenantMember(tenant, userId);
+                }
+            );
+        }
     }
 
     @ResponseStatus(value = HttpStatus.OK)
@@ -93,13 +133,33 @@ public class IdmUsersResource {
 
     @PostMapping(value = "/rest/admin/users")
     public UserRepresentation createNewUser(@RequestBody CreateUserRepresentation userRepresentation) {
-        return new UserRepresentation(userService.createNewUser(
-                userRepresentation.getId(),
-                userRepresentation.getFirstName(),
-                userRepresentation.getLastName(),
-                userRepresentation.getEmail(),
-                userRepresentation.getPassword(),
-                userRepresentation.getTenantId()));
+        String tenantId = null;
+        if(tenantMapping){
+            if(!userRepresentation.getTenants().isEmpty()){
+                tenantId = userRepresentation.getTenantIds().get(0);
+            }
+        } else {
+            tenantId = userRepresentation.getTenantId();
+        }
+        UserRepresentation ur = new UserRepresentation(userService.createNewUser(
+            userRepresentation.getId(),
+            userRepresentation.getFirstName(),
+            userRepresentation.getLastName(),
+            userRepresentation.getEmail(),
+            userRepresentation.getPassword(),
+            tenantId
+            ));
+
+        if(tenantMapping){
+            userRepresentation.getTenantIds().forEach(
+                (tenant) -> {
+                    tenantService.addTenantMember(tenant, userRepresentation.getId());
+                    userRepresentation.getTenants().add(new TenantRepresentation(tenantService.getTenant(tenant)));
+                }
+            );
+        }
+
+        return ur;
     }
 
 }

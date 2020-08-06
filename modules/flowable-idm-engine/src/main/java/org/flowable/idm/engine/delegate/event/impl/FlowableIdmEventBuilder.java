@@ -16,6 +16,7 @@ import org.flowable.common.engine.api.delegate.event.FlowableEntityEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
 import org.flowable.idm.api.event.FlowableIdmEventType;
 import org.flowable.idm.api.event.FlowableIdmMembershipEvent;
+import org.flowable.idm.api.event.FlowableIdmTenantMembershipEvent;
 
 /**
  * Builder class used to create {@link FlowableEvent} implementations.
@@ -51,6 +52,13 @@ public class FlowableIdmEventBuilder {
         FlowableIdmMembershipEventImpl newEvent = new FlowableIdmMembershipEventImpl(type);
         newEvent.setUserId(userId);
         newEvent.setGroupId(groupId);
+        return newEvent;
+    }
+
+    public static FlowableIdmTenantMembershipEvent createTenantMembershipEvent(FlowableIdmEventType type, String tenantId, String userId) {
+        FlowableIdmTenantMembershipEventImpl newEvent = new FlowableIdmTenantMembershipEventImpl(type);
+        newEvent.setUserId(userId);
+        newEvent.setTenantId(tenantId);
         return newEvent;
     }
 }

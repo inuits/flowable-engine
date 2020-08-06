@@ -30,6 +30,9 @@ public class UserRepresentation extends AbstractRepresentation {
     protected String tenantId;
     protected List<GroupRepresentation> groups = new ArrayList<>();
     protected List<String> privileges = new ArrayList<>();
+    protected List<TenantRepresentation> tenants = new ArrayList<>();
+    protected List<String> tenantIds = new ArrayList<>();
+    protected Boolean tenantMapping;
 
     public UserRepresentation() {
 
@@ -109,6 +112,30 @@ public class UserRepresentation extends AbstractRepresentation {
 
     public void setPrivileges(List<String> privileges) {
         this.privileges = privileges;
+    }
+
+    public List<TenantRepresentation> getTenants() {
+        return tenants;
+    }
+
+    public void setTenants(List<TenantRepresentation> tenants) {
+        this.tenants = tenants;
+    }
+
+    public List<String> getTenantIds() {
+        return tenantIds;
+    }
+
+    public void setTenantIds(List<String> tenantIds) {
+        this.tenantIds = tenantIds;
+    }
+
+    public Boolean getTenantMapping() {
+        return tenantMapping;
+    }
+
+    public void setTenantMapping(Boolean tenantMapping) {
+        this.tenantMapping = tenantMapping;
     }
 
 }

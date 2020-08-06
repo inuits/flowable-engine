@@ -61,10 +61,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 /**
  * Service for invoking Flowable REST services.
  */
@@ -83,7 +79,7 @@ public class FlowableClientService {
 
     @Autowired
     protected ObjectMapper objectMapper;
-    
+
     @Value("${flowable.admin.app.security.tenant-filtering:false}")
     boolean enableTenantFiltering;
 
@@ -133,12 +129,12 @@ public class FlowableClientService {
      * Execute the given request. Will return the parsed JSON present in the response-body, in case the status code is 200 - OK. In case the response returns a different status-code, an
      * {@link FlowableServiceException} is thrown with the error message received from the client, if possible.
      */
-    public JsonNode executeRequest(HttpUriRequest request, ServerConfig serverConfig) {
-        return executeRequest(request, serverConfig, HttpStatus.SC_OK);
-    }
-
     public JsonNode executeRequest(HttpUriRequest request, ServerConfig serverConfig, int expectedStatusCode) {
         return executeRequest(request, serverConfig.getUserName(), serverConfigService.decrypt(serverConfig.getPassword()), expectedStatusCode);
+    }
+    
+    public JsonNode executeRequest(HttpUriRequest request, ServerConfig serverConfig) {
+        return executeRequest(request, serverConfig, HttpStatus.SC_OK);
     }
 
     public JsonNode executeRequest(HttpUriRequest request, String userName, String password) {
@@ -150,12 +146,10 @@ public class FlowableClientService {
      * {@link FlowableServiceException} is thrown with the error message received from the client, if possible.
      */
     public JsonNode executeRequest(HttpUriRequest request, String userName, String password, int expectedStatusCode) {
-        if (enableTenantFiltering) {
-            final String tenantId = SecurityUtils.getCurrentUserObject().getTenantId();
-
-            if (tenantId != null) {
-                request.addHeader("x-tenant", tenantId);
-            }
+        
+        String tenantId = SecurityUtils.getCurrentTenantId();
+        if (enableTenantFiltering && tenantId != null && !tenantId.isEmpty()) {
+            request.addHeader("x-tenant", tenantId);
         }
         
         FlowableServiceException exception = null;
@@ -605,14 +599,6 @@ public class FlowableClientService {
         }
 
         URIBuilder builder = createUriBuilder(finalUrl + uri);
-        
-        if (enableTenantFiltering) {
-            final String tenantId = SecurityUtils.getCurrentUserObject().getTenantId();
-            if (tenantId != null) {
-                builder.setParameter("tenantId", tenantId);
-            }
-        }
-
         return builder.toString();
     }
 
@@ -647,6 +633,7 @@ public class FlowableClientService {
         addParameterToBuilder("size", bodyNode, builder);
         addParameterToBuilder("sort", bodyNode, builder);
         addParameterToBuilder("order", bodyNode, builder);
+        addParameterToBuilder("tenantId", bodyNode, builder);
         return builder.build().toString();
     }
 

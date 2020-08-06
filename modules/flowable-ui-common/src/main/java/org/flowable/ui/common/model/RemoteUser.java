@@ -27,6 +27,7 @@ public class RemoteUser implements User {
     protected String fullName;
     protected String tenantId;
     protected List<RemoteGroup> groups = new ArrayList<>();
+    protected List<RemoteTenant> tenants = new ArrayList<>();
     protected List<String> privileges = new ArrayList<>();
 
     @Override
@@ -101,6 +102,14 @@ public class RemoteUser implements User {
 
     public void setPrivileges(List<String> privileges) {
         this.privileges = privileges;
+    }
+
+    public List<RemoteTenant> getTenants() {
+        return tenants;
+    }
+
+    public void setTenants(List<RemoteTenant> tenants) {
+        this.tenants = tenants;
     }
 
     @Override

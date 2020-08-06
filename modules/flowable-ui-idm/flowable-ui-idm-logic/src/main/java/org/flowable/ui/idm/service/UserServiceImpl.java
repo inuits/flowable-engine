@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.flowable.idm.api.Group;
+import org.flowable.idm.api.Tenant;
 import org.flowable.idm.api.Privilege;
 import org.flowable.idm.api.User;
 import org.flowable.idm.api.UserQuery;
@@ -106,6 +107,13 @@ public class UserServiceImpl extends AbstractIdmService implements UserService {
                 identityService.deleteMembership(userId, group.getId());
             }
         }
+
+        List<Tenant> tenants = identityService.createTenantQuery().tenantMember(userId).list();
+        if (tenants != null && tenants.size() > 0) {
+            for (Tenant tenant : tenants) {
+                identityService.deleteTenantMembership(userId, tenant.getId());
+            }
+        }
         identityService.deleteUser(userId);
     }
 
@@ -169,7 +177,9 @@ public class UserServiceImpl extends AbstractIdmService implements UserService {
             }
         }
 
-        return new UserInformation(user, groups, new ArrayList<>(privilegeNames));
+        List<Tenant> tenants = identityService.createTenantQuery().tenantMember(userId).list();
+
+        return new UserInformation(user, groups, new ArrayList<>(privilegeNames), tenants);
     }
 
 }

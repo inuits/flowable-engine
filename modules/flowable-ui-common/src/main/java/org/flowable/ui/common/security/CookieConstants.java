@@ -15,5 +15,6 @@ package org.flowable.ui.common.security;
 public interface CookieConstants {
 
     String COOKIE_NAME = "FLOWABLE_REMEMBER_ME";
+    String COOKIE_TENANT = "tenantId";
 
 }

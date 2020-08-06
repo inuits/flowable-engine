@@ -257,4 +257,50 @@ angular.module('flowableApp').service('IdmService', ['$http', '$q', '$rootScope'
             )
         };
 
+
+        /*
+            TENANTS
+        */
+
+        this.getTenants = function(params) {
+            return httpAsPromise({
+                method: 'GET',
+                url: FLOWABLE.CONFIG.contextRoot + '/app/rest/admin/tenants',
+                params: params
+            })
+        };
+
+        this.createTenant = function (createTenantData) {
+
+            return httpAsPromise(
+                {
+                    method: 'POST',
+                    url: FLOWABLE.CONFIG.contextRoot + '/app/rest/admin/tenants',
+                    data: createTenantData
+                }
+            )
+        };
+
+
+        this.updateTenant = function (tenantId, updatedTenantData) {
+
+            var data = {name: updatedTenantData.name};
+            return httpAsPromise(
+                {
+                    method: 'PUT',
+                    url: FLOWABLE.CONFIG.contextRoot + '/app/rest/admin/tenants/' + tenantId ,
+                    data: data
+                }
+            )
+        };
+
+        this.deleteTenant = function(tenantId) {
+            return httpAsPromise(
+                {
+                    method: 'DELETE',
+                    url: FLOWABLE.CONFIG.contextRoot + '/app/rest/admin/tenants/' + tenantId
+                }
+            )
+        };
+
     }]);

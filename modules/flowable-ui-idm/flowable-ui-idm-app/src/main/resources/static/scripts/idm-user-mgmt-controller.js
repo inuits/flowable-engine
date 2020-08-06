@@ -13,8 +13,8 @@
 /**
  * Controller for user mgmt
  */
-flowableApp.controller('IdmUserMgmtController', ['$rootScope', '$scope', '$translate', '$http', '$timeout','$location', '$modal',
-    function ($rootScope, $scope, $translate, $http, $timeout, $location, $modal) {
+flowableApp.controller('IdmUserMgmtController', ['$rootScope', '$scope', '$translate', '$http', '$timeout','$location', '$modal', 'IdmService',
+    function ($rootScope, $scope, $translate, $http, $timeout, $location, $modal, IdmService) {
 
         $rootScope.setMainPageById('userMgmt');
 
@@ -60,7 +60,6 @@ flowableApp.controller('IdmUserMgmtController', ['$rootScope', '$scope', '$trans
                     $scope.model.loading = false;
                 });
         };
-
 
         $scope.refreshDelayed = function() {
             // If already waiting, another wait-cycle will be done
@@ -213,6 +212,17 @@ flowableApp.controller('IdmUserMgmtController', ['$rootScope', '$scope', '$trans
 
         $scope.loadUsers();
 
+        $scope.loadTenants = function() {
+            $scope.tenants = [];
+
+            IdmService.getTenants().then(function (data) {
+                $scope.tenants = data;
+            });
+        };
+
+        $scope.loadTenants();
+
+
     }]);
 
 
@@ -222,9 +232,12 @@ flowableApp.controller('IdmUserMgmtController', ['$rootScope', '$scope', '$trans
 flowableApp.controller('IdmCreateUserPopupController', ['$rootScope', '$scope', '$http',
     function ($rootScope, $scope, $http) {
 
-
         if ($scope.model.user === null || $scope.model.user === undefined) {
             $scope.model.user = {};
+        } else {
+            $scope.model.user.currentTenants = $scope.model.user.tenants.map(function (tenant) {
+                return tenant.id;
+            });
         }
 
         $scope.createNewUser = function () {
@@ -242,6 +255,7 @@ flowableApp.controller('IdmCreateUserPopupController', ['$rootScope', '$scope', 
                 lastName: model.user.lastName,
                 password: model.user.password,
                 tenantId: model.user.tenantId,
+                tenantIds: model.user.currentTenants,
             };
 
             $http({method: 'POST', url: FLOWABLE.CONFIG.contextRoot + '/app/rest/admin/users', data: data}).
@@ -285,6 +299,7 @@ flowableApp.controller('IdmCreateUserPopupController', ['$rootScope', '$scope', 
                 firstName: model.user.firstName,
                 lastName: model.user.lastName,
                 tenantId: model.user.tenantId,
+                tenants: model.user.currentTenants,
             };
 
             $http({method: 'PUT', url: FLOWABLE.CONFIG.contextRoot + '/app/rest/admin/users/' + $scope.model.user.id, data: data}).

@@ -16,21 +16,24 @@ import java.util.List;
 
 import org.flowable.idm.api.Group;
 import org.flowable.idm.api.User;
+import org.flowable.idm.api.Tenant;
 
 public class UserInformation {
 
     protected User user;
     protected List<Group> groups;
     protected List<String> privileges;
+    protected List<Tenant> tenants;
 
     public UserInformation() {
 
     }
 
-    public UserInformation(User user, List<Group> groups, List<String> privileges) {
+    public UserInformation(User user, List<Group> groups, List<String> privileges, List<Tenant> tenants) {
         this.user = user;
         this.groups = groups;
         this.privileges = privileges;
+        this.tenants = tenants;
     }
 
     public User getUser() {
@@ -55,6 +58,14 @@ public class UserInformation {
 
     public void setPrivileges(List<String> privileges) {
         this.privileges = privileges;
+    }
+
+    public List<Tenant> getTenants() {
+        return tenants;
+    }
+
+    public void setTenants(List<Tenant> tenants) {
+        this.tenants = tenants;
     }
 
 }

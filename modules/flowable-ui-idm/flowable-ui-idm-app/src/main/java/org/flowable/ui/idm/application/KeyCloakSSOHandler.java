@@ -28,9 +28,13 @@ import org.springframework.context.annotation.Primary;
 
 @Component
 @Primary
+<<<<<<< HEAD
 @ConditionalOnProperty(
             value="flowable.sso.provider",
             havingValue = "keycloak")
+=======
+@ConditionalOnProperty("flowable.sso.keycloak.enabled")
+>>>>>>> tenant-mapping
 public class KeyCloakSSOHandler implements SSOHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(KeyCloakSSOHandler.class);
@@ -50,6 +54,7 @@ public class KeyCloakSSOHandler implements SSOHandler {
     @Value("${flowable.sso.keycloak.url.info:#{null}}")
     private String ssoUserInfoUrl;
 
+<<<<<<< HEAD
     @Value("${flowable.sso.keycloak.scope:#{null}}")
     private String ssoScope;
 
@@ -59,6 +64,8 @@ public class KeyCloakSSOHandler implements SSOHandler {
     @Value("${flowable.sso.keycloak.userinfo.client_roles:#{null}}")
     private String ssoUserInfoClientRoles;
 
+=======
+>>>>>>> tenant-mapping
     @Autowired
     private Environment env;
 
@@ -90,6 +97,7 @@ public class KeyCloakSSOHandler implements SSOHandler {
     public String getExternalUrl(String redirectUri) {
         this.redirectUri = redirectUri;
         this.state = UUID.randomUUID().toString();
+<<<<<<< HEAD
         String externalUrl = ssoExternalUrl
             + "?response_type=code"
             + "&client_id=" + ssoClientId
@@ -99,6 +107,15 @@ public class KeyCloakSSOHandler implements SSOHandler {
             + "&response_mode=query";
         LOGGER.info("Keycloak external url: " + externalUrl);
         return externalUrl;
+=======
+        return ssoExternalUrl
+            + "?response_type=code"
+            + "&client_id=" + ssoClientId
+            + "&scope=all"
+            + "&state=" + state
+            + "&redirect_uri=" + redirectUri
+            + "&response_mode=query";
+>>>>>>> tenant-mapping
     }
 
     private String getAccessToken(String code) {
@@ -133,6 +150,7 @@ public class KeyCloakSSOHandler implements SSOHandler {
         json = new JSONObject(resp);
 
         List<String> privs = new ArrayList<>();
+<<<<<<< HEAD
         if(json.has(ssoUserInfoClientRoles)){
             for (Object priv : json.getJSONArray(ssoUserInfoClientRoles)) {
                 privs.add(priv.toString());
@@ -142,6 +160,10 @@ public class KeyCloakSSOHandler implements SSOHandler {
         String tenant = null;
         if(json.has(ssoUserInfoTenant)){
             tenant = json.getString(ssoUserInfoTenant);
+=======
+        for (Object priv : json.getJSONArray("privileges")) {
+            privs.add(priv.toString());
+>>>>>>> tenant-mapping
         }
 
         return new SSOUserInfo(
@@ -150,7 +172,11 @@ public class KeyCloakSSOHandler implements SSOHandler {
             json.getString("family_name"),
             json.getString("email"),
             privs,
+<<<<<<< HEAD
             tenant
+=======
+            json.getString("tenant")
+>>>>>>> tenant-mapping
         );
 
     }

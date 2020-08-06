@@ -30,18 +30,12 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URIBuilder;
 import org.flowable.ui.admin.domain.ServerConfig;
 import org.flowable.ui.admin.service.engine.exception.FlowableServiceException;
-import org.flowable.ui.common.security.SecurityUtils;
 import org.flowable.ui.common.service.exception.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Service for invoking Flowable REST services.
@@ -76,27 +70,17 @@ public class ProcessInstanceService {
 
     @Autowired
     protected ObjectMapper objectMapper;
-    
-    @Value("${flowable.admin.app.security.tenant-filtering:false}")
-    boolean enableTenantFiltering;
 
     public JsonNode listProcesInstances(ObjectNode bodyNode, ServerConfig serverConfig) {
         JsonNode resultNode = null;
         try {
             URIBuilder builder = new URIBuilder("query/historic-process-instances");
-            
-            if (enableTenantFiltering) {
-                final String tenantId = SecurityUtils.getCurrentUserObject().getTenantId();
-                if (tenantId != null) {
-                    bodyNode.put("tenantId", tenantId);
-                }
-            }
 
             String uri = clientUtil.getUriWithPagingAndOrderParameters(builder, bodyNode);
             HttpPost post = clientUtil.createPost(uri, serverConfig);
 
             post.setEntity(clientUtil.createStringEntity(bodyNode.toString()));
-            resultNode = clientUtil.executeRequest(post, serverConfig);
+            resultNode = clientUtil.executeRequest(post, serverConfig); 
         } catch (Exception e) {
             throw new FlowableServiceException(e.getMessage(), e);
         }

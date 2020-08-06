@@ -59,7 +59,7 @@ public class ModelsResource {
 
     @GetMapping(value = "/rest/models", produces = "application/json")
     public ResultListDataRepresentation getModels(@RequestParam(required = false) String filter, @RequestParam(required = false) String sort, @RequestParam(required = false) Integer modelType,
-            HttpServletRequest request) {
+    HttpServletRequest request) {
 
         return modelQueryService.getModels(filter, sort, modelType, request);
     }

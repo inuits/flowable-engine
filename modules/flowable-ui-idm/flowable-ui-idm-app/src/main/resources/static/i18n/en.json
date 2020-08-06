@@ -84,7 +84,8 @@
             "PROFILE": "Personal",
             "USER-MGMT": "Users",
             "GROUP-MGMT": "Groups",
-            "PRIVILEGE-MGMT": "Privileges"
+            "PRIVILEGE-MGMT": "Privileges",
+            "TENANT-MGMT": "Tenants"
         },
         "ACTION": {
           "CANCEL": "Cancel",
@@ -173,7 +174,8 @@
              "BULK-UPDATE-PASSWORD-TITLE": "Change password",
              "BULK-UPDATE-PASSWORD": "Password",
              "BULK-UPDATE-PASSWORD-REPEAT": "Repeat password",
-             "BULK-UPDATE-PASSWORD-CONFIRM": "Change"
+             "BULK-UPDATE-PASSWORD-CONFIRM": "Change",
+             "PLACEHOLDER-TENANT": "Choose between the following tenants"
          }
       },
       "FUNCTIONAL-GROUP-MGMT": {
@@ -257,6 +259,22 @@
             "CHANGE-PASSWORD-NOT-MATCHING": "Passwords don't match",
             "CHANGE-PASSWORD-INVALID": "Invalid password"
          }
+      },
+      "TENANT-MGMT": {
+        "TITLE": "Tenants",
+        "CREATE-TENANT": "Create tenant",
+        "NAME": "Name",
+        "ID": "ID",
+        "ACTIONS": "Select an action",
+        "EDIT-TENANT": "Change details",
+        "DELETE-TENANT": "Delete",
+        "POPUP": {
+          "CREATE-TITLE": "Create tenant",
+          "CREATE-ID": "Tenant id",
+          "CREATE-NAME": "Name",
+          "DELETE-TITLE": "Delete tenant",
+          "EDIT-TITLE": "Edit tenant"
+        }
       },
       "USERS": {
         "TITLE": "User administration",

@@ -106,6 +106,13 @@ flowableApp
                 verify: authRouteResolver
             }
         })
+        .when('/tenant-mgmt', {
+            controller: 'TenantMgmtController',
+            templateUrl: appResourceRoot + 'views/idm-tenant-mgmt.html',
+            resolve: {
+                verify: authRouteResolver
+            }
+        })
         .when('/logout', {
             templateUrl: appResourceRoot + 'views/empty.html',
             controller: 'LogoutController'
@@ -202,7 +209,13 @@ flowableApp
                     }
                 ];
 
-
+                if($rootScope.account && $rootScope.account.tenantMapping){
+                    $rootScope.mainNavigation.push({
+                        id: 'tenantMgmt',
+                        title: 'IDM.GENERAL.NAVIGATION.TENANT-MGMT',
+                        path: '/tenant-mgmt'
+                    });
+                }
                 /*
                  * Set the current main page, using the page object. If the page is already active,
                  * this is a no-op.

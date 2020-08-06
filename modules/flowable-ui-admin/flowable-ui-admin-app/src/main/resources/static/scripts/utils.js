@@ -291,7 +291,7 @@ FlowableAdmin.Utils.Filter.prototype = {
 		if(this.sort !== undefined) {
 			params.sort = this.sort.id;
 		}
-
+		
 		// Add filter properties
 		for (var filter in this.properties) {
 			if (this.properties[filter] !== undefined && this.properties[filter] !== '' && this.properties[filter] !== null) {

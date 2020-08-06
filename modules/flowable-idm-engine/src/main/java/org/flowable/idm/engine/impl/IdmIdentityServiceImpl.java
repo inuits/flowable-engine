@@ -18,6 +18,8 @@ import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.common.engine.impl.service.CommonEngineServiceImpl;
 import org.flowable.idm.api.Group;
 import org.flowable.idm.api.GroupQuery;
+import org.flowable.idm.api.Tenant;
+import org.flowable.idm.api.TenantQuery;
 import org.flowable.idm.api.IdmIdentityService;
 import org.flowable.idm.api.NativeGroupQuery;
 import org.flowable.idm.api.NativeTokenQuery;
@@ -38,6 +40,9 @@ import org.flowable.idm.engine.impl.cmd.CreateGroupQueryCmd;
 import org.flowable.idm.engine.impl.cmd.CreateMembershipCmd;
 import org.flowable.idm.engine.impl.cmd.CreatePrivilegeCmd;
 import org.flowable.idm.engine.impl.cmd.CreatePrivilegeQueryCmd;
+import org.flowable.idm.engine.impl.cmd.CreateTenantCmd;
+import org.flowable.idm.engine.impl.cmd.CreateTenantQueryCmd;
+import org.flowable.idm.engine.impl.cmd.CreateTenantMembershipCmd;
 import org.flowable.idm.engine.impl.cmd.CreateTokenCmd;
 import org.flowable.idm.engine.impl.cmd.CreateTokenQueryCmd;
 import org.flowable.idm.engine.impl.cmd.CreateUserCmd;
@@ -46,6 +51,8 @@ import org.flowable.idm.engine.impl.cmd.DeleteGroupCmd;
 import org.flowable.idm.engine.impl.cmd.DeleteMembershipCmd;
 import org.flowable.idm.engine.impl.cmd.DeletePrivilegeCmd;
 import org.flowable.idm.engine.impl.cmd.DeletePrivilegeMappingCmd;
+import org.flowable.idm.engine.impl.cmd.DeleteTenantCmd;
+import org.flowable.idm.engine.impl.cmd.DeleteTenantMembershipCmd;
 import org.flowable.idm.engine.impl.cmd.DeleteTokenCmd;
 import org.flowable.idm.engine.impl.cmd.DeleteUserCmd;
 import org.flowable.idm.engine.impl.cmd.DeleteUserInfoCmd;
@@ -56,6 +63,7 @@ import org.flowable.idm.engine.impl.cmd.GetUserInfoKeysCmd;
 import org.flowable.idm.engine.impl.cmd.GetUserPictureCmd;
 import org.flowable.idm.engine.impl.cmd.GetUsersWithPrivilegeCmd;
 import org.flowable.idm.engine.impl.cmd.SaveGroupCmd;
+import org.flowable.idm.engine.impl.cmd.SaveTenantCmd;
 import org.flowable.idm.engine.impl.cmd.SaveTokenCmd;
 import org.flowable.idm.engine.impl.cmd.SaveUserCmd;
 import org.flowable.idm.engine.impl.cmd.SetUserInfoCmd;
@@ -246,5 +254,35 @@ public class IdmIdentityServiceImpl extends CommonEngineServiceImpl<IdmEngineCon
     @Override
     public List<User> getUsersWithPrivilege(String name) {
         return commandExecutor.execute(new GetUsersWithPrivilegeCmd(name));
+    }
+
+    @Override
+    public Tenant newTenant(String tenantId) {
+        return commandExecutor.execute(new CreateTenantCmd(tenantId));
+    }
+
+    @Override
+    public void saveTenant(Tenant tenant) {
+        commandExecutor.execute(new SaveTenantCmd(tenant));
+    }
+
+    @Override
+    public void deleteTenant(String tenantId) {
+        commandExecutor.execute(new DeleteTenantCmd(tenantId));
+    }
+
+    @Override
+    public TenantQuery createTenantQuery() {
+        return commandExecutor.execute(new CreateTenantQueryCmd());
+    }
+
+    @Override
+    public void createTenantMembership(String userId, String tenantId) {
+        commandExecutor.execute(new CreateTenantMembershipCmd(userId, tenantId));
+    }
+
+    @Override
+    public void deleteTenantMembership(String userId, String tenantId) {
+        commandExecutor.execute(new DeleteTenantMembershipCmd(userId, tenantId));
     }
 }

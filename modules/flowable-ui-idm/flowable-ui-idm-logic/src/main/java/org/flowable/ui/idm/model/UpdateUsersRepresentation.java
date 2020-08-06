@@ -26,9 +26,10 @@ public class UpdateUsersRepresentation extends AbstractRepresentation {
     protected String firstName;
     protected String lastName;
     protected String email;
-    protected String tenantId;
     protected String password;
+    protected String tenantId;
     protected List<String> users = new ArrayList<>();
+    protected List<String> tenants = new ArrayList<>();
 
     public UpdateUsersRepresentation() {
 
@@ -65,7 +66,7 @@ public class UpdateUsersRepresentation extends AbstractRepresentation {
     public void setEmail(String email) {
         this.email = email;
     }
-    
+
     public String getTenantId() {
         return tenantId;
     }
@@ -76,7 +77,7 @@ public class UpdateUsersRepresentation extends AbstractRepresentation {
         else
             this.tenantId = tenantId;
     }
-    
+
     public String getPassword() {
         return password;
     }
@@ -91,6 +92,14 @@ public class UpdateUsersRepresentation extends AbstractRepresentation {
 
     public void setUsers(List<String> users) {
         this.users = users;
+    }
+
+    public List<String> getTenants() {
+        return tenants;
+    }
+
+    public void setTenants(List<String> tenants) {
+        this.tenants = tenants;
     }
 
 }
