@@ -7,6 +7,8 @@ drop table if exists ACT_ID_USER cascade constraints;
 drop table if exists ACT_ID_TOKEN cascade constraints;
 drop table if exists ACT_ID_PRIV cascade constraints;
 drop table if exists ACT_ID_PRIV_MAPPING cascade constraints;
+drop table if exists ACT_ID_TENANT cascade constraints;
+drop table if exists ACT_ID_TENANT_MAPPING cascade constraints;
 
 drop index if exists ACT_IDX_PRIV_USER;
 drop index if exists ACT_IDX_PRIV_GROUP;
