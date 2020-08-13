@@ -1158,6 +1158,10 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 				<version>3.5.0</version>
@@ -1972,4 +1976,14 @@
 		<connection>scm:git:git@github.com:flowable/flowable-engine.git</connection>
 		<developerConnection>scm:git:git@github.com:flowable/flowable-engine.git</developerConnection>
 	</scm>
+	<distributionManagement>
+		<snapshotRepository>
+			<id>maven-flowable</id>
+			<url>https://nexus.inuits.io/repository/maven-flowable/</url>
+		</snapshotRepository>
+		<repository>
+			<id>maven-flowable</id>
+			<url>https://nexus.inuits.io/repository/maven-flowable/</url>
+		</repository>
+	</distributionManagement>
 </project>
