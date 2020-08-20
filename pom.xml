@@ -1978,12 +1978,12 @@
 	</scm>
 	<distributionManagement>
 		<snapshotRepository>
-			<id>maven-flowable</id>
-			<url>https://nexus.inuits.io/repository/maven-flowable/</url>
+			<id>maven-snapshots</id>
+			<url>https://nexus.inuits.io/repository/maven-snapshots/</url>
 		</snapshotRepository>
 		<repository>
-			<id>maven-flowable</id>
-			<url>https://nexus.inuits.io/repository/maven-flowable/</url>
+			<id>maven-releases</id>
+			<url>https://nexus.inuits.io/repository/maven-releases/</url>
 		</repository>
 	</distributionManagement>
 </project>
