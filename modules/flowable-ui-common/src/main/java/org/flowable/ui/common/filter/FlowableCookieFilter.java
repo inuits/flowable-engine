@@ -170,11 +170,16 @@ public class FlowableCookieFilter extends OncePerRequestFilter {
         String tenantId = getTenantFromCookie(request);
         if(tenantId != null && (SecurityUtils.getCurrentTenantId() == null || !tenantId.equals(SecurityUtils.getCurrentTenantId()))){
             RemoteUser remoteUser = remoteIdmService.getUser(SecurityUtils.getCurrentUserId());
-            if (remoteUser != null && remoteUser.getTenants() != null && remoteUser.getTenants().size() > 1) {
-                for (RemoteTenant remoteTenant : remoteUser.getTenants()) {
-                    if(remoteTenant.getId().equals(tenantId)) {
-                        SecurityUtils.setCurrentTenantId(tenantId);
-                        LOGGER.debug("User {} switched to tenant: {}", remoteUser.getDisplayName(), tenantId);
+            if(remoteUser != null) {
+                if(tenantId.equals("null")) {
+                    SecurityUtils.setCurrentTenantId(null);
+                    LOGGER.info("User {} switched to all tenants", remoteUser.getId());
+                } else if (remoteUser.getTenants() != null && remoteUser.getTenants().size() > 1) {
+                    for (RemoteTenant remoteTenant : remoteUser.getTenants()) {
+                        if(remoteTenant.getId().equals(tenantId)) {
+                            SecurityUtils.setCurrentTenantId(tenantId);
+                            LOGGER.info("User {} switched to tenant: {}", remoteUser.getId(), tenantId);
+                        }
                     }
                 }
             }
