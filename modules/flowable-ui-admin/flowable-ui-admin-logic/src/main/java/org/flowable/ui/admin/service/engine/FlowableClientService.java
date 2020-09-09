@@ -599,6 +599,12 @@ public class FlowableClientService {
         }
 
         URIBuilder builder = createUriBuilder(finalUrl + uri);
+        if (enableTenantFiltering) {
+            final String tenantId = SecurityUtils.getCurrentTenantId();
+            if (tenantId != null) {
+                builder.setParameter("tenantId", tenantId);
+            }
+        }
         return builder.toString();
     }
 
