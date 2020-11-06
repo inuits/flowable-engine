@@ -7,3 +7,5 @@ drop table if exists ACT_ID_USER cascade;
 drop table if exists ACT_ID_TOKEN cascade;
 drop table if exists ACT_ID_PRIV cascade;
 drop table if exists ACT_ID_PRIV_MAPPING cascade;
+drop table if exists ACT_ID_TENANT cascade;
+drop table if exists ACT_ID_TENANT_MAPPING cascade;
