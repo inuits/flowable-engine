@@ -110,6 +110,9 @@ public class JsonType implements VariableType, MutableVariableType<JsonNode, Jso
             valueFields.setBytes(null);
             valueFields.setCachedValue(null);
         } else {
+            if (value instanceof LinkedHashMap) {
+                value = objectMapper.convertValue(value, JsonNode.class);
+            }
             JsonNode jsonNode = (JsonNode) value;
             String textValue = objectMapper.valueToTree(value).toString();
             if (textValue.length() <= maxLength) {
